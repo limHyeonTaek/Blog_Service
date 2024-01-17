@@ -31,7 +31,8 @@
   
 ---
 # ERD
-![erd]()
+
+![BlogProject.png](img%2FBlogProject.png)
 
 # Trouble Shooting
 
