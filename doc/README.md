@@ -5,7 +5,6 @@
 
 # <기능>
 
----
 - 회원가입 및 로그인
   - 이름, 이메일, 비밀번호, 전화번호로 회원가입 할 수 있습니다.
   - 이메일과 비밀번호로 로그인 할 수 있습니다.
@@ -36,10 +35,7 @@
 
 # Trouble Shooting
 
----
 [Trouble_Shooting.md](Trouble_Shooting.md)
-
----
 
 # <개발 스택>
 - Java, Gradle, Spring boot
