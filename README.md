@@ -35,7 +35,7 @@
 
 # Trouble Shooting
 
-[Trouble_Shooting.md](Trouble_Shooting.md)
+[Trouble_Shooting.md](doc/Trouble_Shooting.md)
 
 # <개발 스택>
 - Java, Gradle, Spring boot
