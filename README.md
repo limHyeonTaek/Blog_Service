@@ -30,8 +30,7 @@
   
 ---
 # ERD
-
-![BlogProject.png](img%2FBlogProject.png)
+![BlogProject.png](doc%2Fimg%2FBlogProject.png)
 
 # Trouble Shooting
 
