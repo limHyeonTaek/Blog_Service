@@ -58,4 +58,16 @@ public class CategoryService {
     return category;
   }
 
+  /**
+   * 카테고리 삭제
+   * 해당 카테고리가 없으면 예외를 발생
+   */
+  @Transactional
+  public void deleteCategory(Long id) {
+    Category category = getCategory(id);
+    categoryRepository.findById(id)
+        .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
+    categoryRepository.delete(category);
+  }
+
 }

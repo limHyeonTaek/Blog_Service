@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,6 +49,13 @@ public class CategoryController {
       @Valid @RequestBody CategoryDto categoryName) {
     Category category = categoryService.updateCategory(id, categoryName);
     return new ResponseEntity<>(category, HttpStatus.OK);
+  }
+
+  // 카테고리 삭제
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+    categoryService.deleteCategory(id);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
 }
