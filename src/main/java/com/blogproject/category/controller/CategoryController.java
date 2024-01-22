@@ -4,12 +4,14 @@ import com.blogProject.category.dto.model.CategoryDto;
 import com.blogProject.category.entity.Category;
 import com.blogProject.category.exception.NameAlreadyExistsException;
 import com.blogProject.category.service.CategoryService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,4 +41,13 @@ public class CategoryController {
     List<Category> category = categoryService.getAllCategory();
     return new ResponseEntity<>(category, HttpStatus.OK);
   }
+
+  // 카테고리 수정
+  @PatchMapping("/{id}")
+  public ResponseEntity<?> updateCategory(@PathVariable Long id,
+      @Valid @RequestBody CategoryDto categoryName) {
+    Category category = categoryService.updateCategory(id, categoryName);
+    return new ResponseEntity<>(category, HttpStatus.OK);
+  }
+
 }

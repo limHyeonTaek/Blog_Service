@@ -1,5 +1,6 @@
 package com.blogProject.category.service;
 
+import com.blogProject.category.dto.model.CategoryDto;
 import com.blogProject.category.entity.Category;
 import com.blogProject.category.exception.CategoryNotFoundException;
 import com.blogProject.category.exception.NameAlreadyExistsException;
@@ -39,6 +40,22 @@ public class CategoryService {
   // 모든 카테고리 조회
   public List<Category> getAllCategory() {
     return categoryRepository.findAll();
+  }
+
+  /**
+   * 카테고리 수정
+   * 만약 같은 이름의 카테고리가 이미 있다면 예외를 발생
+   */
+  @Transactional
+  public Category updateCategory(Long id, CategoryDto categoryDto) {
+    String categoryName = categoryDto.getCategoryName();
+
+    Category category = getCategory(id);
+    if (categoryRepository.existsByName(categoryName)) {
+      throw new NameAlreadyExistsException("'" + categoryName + "' 이름의 카테고리가 이미 존재합니다.");
+    }
+    category.setName(categoryName);
+    return category;
   }
 
 }
