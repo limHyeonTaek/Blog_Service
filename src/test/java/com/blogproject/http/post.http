@@ -1,0 +1,9 @@
+### create post
+POST {{host}}/api/post
+Content-Type: application/json
+
+{
+  "title": "post",
+  "contents": "contents",
+  "categoryName": "category1"
+}
