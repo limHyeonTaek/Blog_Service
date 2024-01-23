@@ -43,24 +43,21 @@ public class CategoryService {
   }
 
   /**
-   * 카테고리 수정
-   * 만약 같은 이름의 카테고리가 이미 있다면 예외를 발생
+   * 카테고리 수정 만약 같은 이름의 카테고리가 이미 있다면 예외를 발생
    */
   @Transactional
   public Category updateCategory(Long id, CategoryDto categoryDto) {
     String categoryName = categoryDto.getCategoryName();
-
-    Category category = getCategory(id);
     if (categoryRepository.existsByName(categoryName)) {
       throw new NameAlreadyExistsException("'" + categoryName + "' 이름의 카테고리가 이미 존재합니다.");
     }
+    Category category = getCategory(id);
     category.setName(categoryName);
     return category;
   }
 
   /**
-   * 카테고리 삭제
-   * 해당 카테고리가 없으면 예외를 발생
+   * 카테고리 삭제 해당 카테고리가 없으면 예외를 발생
    */
   @Transactional
   public void deleteCategory(Long id) {
@@ -69,5 +66,4 @@ public class CategoryService {
         .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
     categoryRepository.delete(category);
   }
-
 }
