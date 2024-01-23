@@ -3,7 +3,7 @@ POST {{host}}/api/category
 Content-Type: application/json
 
 {
-  "categoryName": "category"
+  "categoryName": "category12"
 }
 
 ### all category
@@ -11,12 +11,12 @@ GET {{host}}/api/category
 
 
 ### update category
-PATCH http://localhost:8080/api/category/{{id}}
+PUT {{host}}/api/category/{{id}}
 Content-Type: application/json
 
 {
-  "categoryName": "category2"
+  "categoryName": "updateCategory"
 }
 
 ### delete category
-DELETE http://localhost:8080/api/category/{{id}}
+DELETE {{host}}/api/category/{{id}}
