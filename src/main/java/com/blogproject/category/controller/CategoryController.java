@@ -2,7 +2,6 @@ package com.blogProject.category.controller;
 
 import com.blogProject.category.converter.CategoryConverter;
 import com.blogProject.category.dto.model.CategoryDto;
-import com.blogProject.category.entity.Category;
 import com.blogProject.category.exception.NameAlreadyExistsException;
 import com.blogProject.category.service.CategoryService;
 import javax.validation.Valid;
@@ -32,8 +31,8 @@ public class CategoryController {
   @PostMapping
   public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
     try {
-      Category category = categoryService.createCategory(categoryDto.getCategoryName());
-      CategoryDto responseDto = categoryConverter.entityToDto(category);
+      CategoryDto responseDto = categoryConverter.entityToDto(
+          categoryService.createCategory(categoryDto.getCategoryName()));
       return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     } catch (NameAlreadyExistsException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -43,8 +42,7 @@ public class CategoryController {
   // 카테고리 전체 보기
   @GetMapping
   public ResponseEntity<?> allCategory() {
-    List<Category> categories = categoryService.getAllCategory();
-    List<CategoryDto> categoryDtos = categories.stream()
+    List<CategoryDto> categoryDtos = categoryService.getAllCategory().stream()
         .map(categoryConverter::entityToDto)
         .collect(Collectors.toList());
     return new ResponseEntity<>(categoryDtos, HttpStatus.OK);
@@ -54,8 +52,8 @@ public class CategoryController {
   @PatchMapping("/{id}")
   public ResponseEntity<?> updateCategory(@PathVariable Long id,
       @Valid @RequestBody CategoryDto categoryDto) {
-    Category category = categoryService.updateCategory(id, categoryDto);
-    CategoryDto responseDto = categoryConverter.entityToDto(category);
+    CategoryDto responseDto = categoryConverter.entityToDto(
+        categoryService.updateCategory(id, categoryDto));
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
