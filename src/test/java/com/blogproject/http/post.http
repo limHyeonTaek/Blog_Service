@@ -5,5 +5,11 @@ Content-Type: application/json
 {
   "title": "post",
   "contents": "contents",
-  "categoryName": "category1"
+  "categoryName": null
 }
+
+### 전체 post 조회(최신순)
+GET {{host}}/api/post
+
+### post 조회
+GET {{host}}/api/post/{{id}}
