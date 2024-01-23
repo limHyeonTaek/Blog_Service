@@ -13,3 +13,12 @@ GET {{host}}/api/post
 
 ### post 조회
 GET {{host}}/api/post/{{id}}
+
+### post update
+PATCH {{host}}/api/post/{{id}}
+Content-Type: application/json
+
+{
+  "title": "updateTitile",
+  "contents": "updateContents"
+}
