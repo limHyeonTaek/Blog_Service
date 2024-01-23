@@ -56,6 +56,7 @@ public class PostService {
   }
 
   // 게시글 수정
+  @Transactional
   public PostDto updatePost(Long id, PostDto postDto) {
     Post post = postRepository.findById(id)
         .orElseThrow(() -> new PostNotfoundException("게시된 글이 존재하지 않습니다."));
@@ -65,6 +66,14 @@ public class PostService {
     post.setCategory(category);
     postRepository.save(post);
     return postConverter.entityToDto(post);
+  }
+
+  // 게시글 삭제
+  @Transactional
+  public void deletePost(Long id) {
+    Post post = postRepository.findById(id)
+        .orElseThrow(() -> new PostNotfoundException("게시된 글이 존재하지 않습니다."));
+    postRepository.delete(post);
   }
 
 

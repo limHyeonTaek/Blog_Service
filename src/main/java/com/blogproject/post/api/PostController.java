@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,5 +54,11 @@ public class PostController {
     return new ResponseEntity<>(updatedPost, HttpStatus.OK);
   }
 
+  // 삭제 API
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> deletePost(@PathVariable Long id) {
+    postService.deletePost(id);
+    return new ResponseEntity<>("성공적으로 삭제 되었습니다. ",HttpStatus.OK);
+  }
 
 }
