@@ -1,0 +1,22 @@
+### create category
+POST {{host}}/api/category
+Content-Type: application/json
+
+{
+  "categoryName": "category12"
+}
+
+### all category
+GET {{host}}/api/category
+
+
+### update category
+PUT {{host}}/api/category/{{id}}
+Content-Type: application/json
+
+{
+  "categoryName": "updateCategory"
+}
+
+### delete category
+DELETE {{host}}/api/category/{{id}}
