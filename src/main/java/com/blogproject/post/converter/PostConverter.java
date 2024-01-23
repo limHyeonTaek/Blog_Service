@@ -5,6 +5,8 @@ import com.blogProject.category.exception.CategoryNotFoundException;
 import com.blogProject.category.repository.CategoryRepository;
 import com.blogProject.post.dto.model.PostDto;
 import com.blogProject.post.entity.Post;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,12 @@ public class PostConverter {
       postDto.setCategoryName(post.getCategory().getName());
     }
     return postDto;
+  }
+
+  public List<PostDto> entityToDto(List<Post> posts) {
+    return posts.stream()
+        .map(this::entityToDto)
+        .collect(Collectors.toList());
   }
 
   public Post dtoToEntity(PostDto postDto) {

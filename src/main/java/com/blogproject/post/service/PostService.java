@@ -10,7 +10,6 @@ import com.blogProject.post.exception.PostNotfoundException;
 import com.blogProject.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +51,7 @@ public class PostService {
   // 전체 게시글 조회 (최신순으로)
   public List<PostDto> getAllPosts() {
     List<Post> posts = postRepository.findAllByOrderByCreatedDateDesc();
-    return posts.stream().map(postConverter::entityToDto).collect(Collectors.toList());
+    return postConverter.entityToDto(posts);
   }
 
   // 게시글 수정
@@ -76,5 +75,10 @@ public class PostService {
     postRepository.delete(post);
   }
 
+  // 제목이나 본문 일부만 검색만으로 검색가능
+  public List<PostDto> searchPosts(String keyword) {
+    List<Post> postdtos = postRepository.findByTitleContainingOrContentContaining(keyword);
+    return postConverter.entityToDto(postdtos);
+  }
 
 }

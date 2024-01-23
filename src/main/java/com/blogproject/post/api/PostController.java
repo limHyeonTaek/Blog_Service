@@ -61,4 +61,11 @@ public class PostController {
     return new ResponseEntity<>("성공적으로 삭제 되었습니다. ",HttpStatus.OK);
   }
 
+  // 검색 API
+  @GetMapping("/search")
+  public ResponseEntity<?> searchPosts(@RequestParam String keyword) {
+    List<PostDto> posts = postService.searchPosts(keyword);
+    return new ResponseEntity<>(posts, HttpStatus.OK);
+  }
+
 }
