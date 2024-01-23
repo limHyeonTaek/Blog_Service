@@ -6,8 +6,11 @@ import com.blogProject.category.repository.CategoryRepository;
 import com.blogProject.post.converter.PostConverter;
 import com.blogProject.post.dto.model.PostDto;
 import com.blogProject.post.entity.Post;
+import com.blogProject.post.exception.PostNotfoundException;
 import com.blogProject.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,4 +41,18 @@ public class PostService {
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
   }
+
+  // 게시글 조회
+  public PostDto getPostById(Long id) {
+    Post post = postRepository.findById(id)
+        .orElseThrow(() -> new PostNotfoundException("게시된 글이 존재하지 않습니다."));
+    return postConverter.entityToDto(post);
+  }
+
+  // 전체 게시글 조회 (최신순으로)
+  public List<PostDto> getAllPosts() {
+    List<Post> posts = postRepository.findAllByOrderByCreatedDateDesc();
+    return posts.stream().map(postConverter::entityToDto).collect(Collectors.toList());
+  }
+
 }
