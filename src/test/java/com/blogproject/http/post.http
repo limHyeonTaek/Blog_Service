@@ -22,3 +22,6 @@ Content-Type: application/json
   "title": "updateTitile",
   "contents": "updateContents"
 }
+
+### delete post
+DELETE {{host}}/api/post/2
