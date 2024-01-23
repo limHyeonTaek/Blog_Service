@@ -24,4 +24,8 @@ Content-Type: application/json
 }
 
 ### delete post
-DELETE {{host}}/api/post/2
+DELETE {{host}}/api/post/{{id}}
+
+### search post
+GET {{host}}/api/post/search?keyword={{keyword}}
+
