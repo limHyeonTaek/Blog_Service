@@ -1,5 +1,7 @@
 package com.blogProject.post.dto.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +23,8 @@ public class PostDto {
   private String contents;
 
   private String categoryName;
+
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime createdDate;
 
 }
