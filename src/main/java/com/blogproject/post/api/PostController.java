@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +44,13 @@ public class PostController {
   public ResponseEntity<?> getAllPosts() {
     List<PostDto> postDtos = postService.getAllPosts();
     return new ResponseEntity<>(postDtos, HttpStatus.OK);
+  }
+
+  // 게시판 수정 API
+  @PatchMapping("/{id}")
+  public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody PostDto postDto) {
+    PostDto updatedPost = postService.updatePost(id, postDto);
+    return new ResponseEntity<>(updatedPost, HttpStatus.OK);
   }
 
 

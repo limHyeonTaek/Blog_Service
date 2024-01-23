@@ -55,4 +55,17 @@ public class PostService {
     return posts.stream().map(postConverter::entityToDto).collect(Collectors.toList());
   }
 
+  // 게시글 수정
+  public PostDto updatePost(Long id, PostDto postDto) {
+    Post post = postRepository.findById(id)
+        .orElseThrow(() -> new PostNotfoundException("게시된 글이 존재하지 않습니다."));
+    Category category = categoryRepository.findByName(postDto.getCategoryName()).orElse(null);
+    post.setTitle(postDto.getTitle());
+    post.setContents(postDto.getContents());
+    post.setCategory(category);
+    postRepository.save(post);
+    return postConverter.entityToDto(post);
+  }
+
+
 }

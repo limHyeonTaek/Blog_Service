@@ -19,6 +19,7 @@ public class PostConverter {
     postDto.setTitle(post.getTitle());
     postDto.setContents(post.getContents());
     postDto.setCreatedDate(post.getCreatedDate());
+    postDto.setUpdatedDate(post.getUpdatedDate());
     if (post.getCategory() != null) {
       postDto.setCategoryName(post.getCategory().getName());
     }
