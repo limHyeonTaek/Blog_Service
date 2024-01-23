@@ -1,6 +1,6 @@
 package com.blogProject.category.converter;
 
-import com.blogProject.category.dto.model.CategoryDto;
+import com.blogProject.category.dto.CategoryDto;
 import com.blogProject.category.entity.Category;
 import org.springframework.stereotype.Component;
 

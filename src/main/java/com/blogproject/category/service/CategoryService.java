@@ -1,12 +1,14 @@
 package com.blogProject.category.service;
 
-import com.blogProject.category.dto.model.CategoryDto;
+import com.blogProject.category.converter.CategoryConverter;
+import com.blogProject.category.dto.CategoryDto;
 import com.blogProject.category.entity.Category;
 import com.blogProject.category.exception.CategoryNotFoundException;
 import com.blogProject.category.exception.NameAlreadyExistsException;
 import com.blogProject.category.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,54 +17,48 @@ import org.springframework.stereotype.Service;
 public class CategoryService {
 
   private final CategoryRepository categoryRepository;
+  private final CategoryConverter categoryConverter;
 
-  /**
-   * 주어진 이름으로 새 카테고리를 생성하고 저장 만약 같은 이름의 카테고리가 이미 있다면 예외를 발생
-   */
   @Transactional
-  public Category createCategory(String categoryName) {
+  public CategoryDto createCategory(String categoryName) {
     if (categoryRepository.existsByName(categoryName)) {
       throw new NameAlreadyExistsException("'" + categoryName + "' 이름의 카테고리가 이미 존재합니다. ");
     }
 
-    // 중복이 없으먼 생성
     Category category = new Category();
     category.setName(categoryName);
-    return categoryRepository.save(category);
+    return categoryConverter.entityToDto(categoryRepository.save(category));
   }
 
-  // 카테고리 조회
-  public Category getCategory(Long id) {
-    return categoryRepository.findById(id)
+  public CategoryDto getCategory(Long id) {
+    Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
+    return categoryConverter.entityToDto(category);
   }
 
-  // 모든 카테고리 조회
-  public List<Category> getAllCategory() {
-    return categoryRepository.findAll();
+  public List<CategoryDto> getAllCategory() {
+    return categoryRepository.findAll().stream()
+        .map(categoryConverter::entityToDto)
+        .collect(Collectors.toList());
   }
 
-  /**
-   * 카테고리 수정 만약 같은 이름의 카테고리가 이미 있다면 예외를 발생
-   */
   @Transactional
-  public Category updateCategory(Long id, CategoryDto categoryDto) {
+  public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
     String categoryName = categoryDto.getCategoryName();
     if (categoryRepository.existsByName(categoryName)) {
       throw new NameAlreadyExistsException("'" + categoryName + "' 이름의 카테고리가 이미 존재합니다.");
     }
-    Category category = getCategory(id);
+    Category category = categoryRepository.findById(id)
+        .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
+
     category.setName(categoryName);
-    return category;
+    Category updatedCategory = categoryRepository.save(category);
+    return categoryConverter.entityToDto(updatedCategory);
   }
 
-  /**
-   * 카테고리 삭제 해당 카테고리가 없으면 예외를 발생
-   */
   @Transactional
   public void deleteCategory(Long id) {
-    Category category = getCategory(id);
-    categoryRepository.findById(id)
+    Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
     categoryRepository.delete(category);
   }
