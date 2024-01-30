@@ -1,27 +1,28 @@
 package com.blogProject.common.member.entity;
 
 import com.blogProject.common.entity.BaseTimeEntity;
+import com.blogProject.common.member.converter.RoleTypeConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Collection;
+import java.util.Collections;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Entity
 @Getter
-@Setter
-@ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
+@Entity
 @Builder
 public class Member extends BaseTimeEntity implements UserDetails {
 
@@ -29,26 +30,26 @@ public class Member extends BaseTimeEntity implements UserDetails {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column
+  @Column(nullable = false)
   private String name;
 
-  @Column
+  @Column(unique = true, nullable = false)
   private String email;
 
-  @Column
+  @Column(nullable = false)
   private String password;
 
-  @Column
+  @Column(unique = true, nullable = false)
   private String phoneNumber;
+
+  @Convert(converter = RoleTypeConverter.class)
+  @Column(nullable = false)
+  private Role role;
+
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return null;
-  }
-
-  @Override
-  public String getPassword() {
-    return null;
+    return Collections.singletonList(new SimpleGrantedAuthority(role.getKey()));
   }
 
   @Override
@@ -58,21 +59,21 @@ public class Member extends BaseTimeEntity implements UserDetails {
 
   @Override
   public boolean isAccountNonExpired() {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isAccountNonLocked() {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isCredentialsNonExpired() {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isEnabled() {
-    return false;
+    return true;
   }
 }
