@@ -34,14 +34,14 @@ public class PostController {
   }
 
   // 게시판 조회 API
-  @GetMapping("/{id}")
+  @GetMapping("/get/{id}")
   public ResponseEntity<?> getPostById(@PathVariable Long id) {
     PostDto postDto = postService.getPostById(id);
     return new ResponseEntity<>(postDto, HttpStatus.OK);
   }
 
   // 게시판 조회 API(최신순)
-  @GetMapping
+  @GetMapping("/get")
   public ResponseEntity<?> getAllPosts() {
     List<PostDto> postDtos = postService.getAllPosts();
     return new ResponseEntity<>(postDtos, HttpStatus.OK);
@@ -58,11 +58,11 @@ public class PostController {
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deletePost(@PathVariable Long id) {
     postService.deletePost(id);
-    return new ResponseEntity<>("성공적으로 삭제 되었습니다. ",HttpStatus.OK);
+    return new ResponseEntity<>("성공적으로 삭제 되었습니다. ", HttpStatus.OK);
   }
 
   // 검색 API
-  @GetMapping("/search")
+  @GetMapping("/get/search")
   public ResponseEntity<?> searchPosts(@RequestParam String keyword) {
     List<PostDto> posts = postService.searchPosts(keyword);
     return new ResponseEntity<>(posts, HttpStatus.OK);

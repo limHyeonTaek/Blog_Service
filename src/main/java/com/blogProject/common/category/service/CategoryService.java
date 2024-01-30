@@ -2,9 +2,9 @@ package com.blogProject.common.category.service;
 
 import com.blogProject.common.category.converter.CategoryConverter;
 import com.blogProject.common.category.dto.CategoryDto;
-import com.blogProject.common.category.exception.NameAlreadyExistsException;
 import com.blogProject.common.category.entity.Category;
 import com.blogProject.common.category.exception.CategoryNotFoundException;
+import com.blogProject.common.category.exception.NameAlreadyExistsException;
 import com.blogProject.common.category.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
