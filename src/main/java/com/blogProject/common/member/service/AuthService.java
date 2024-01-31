@@ -9,10 +9,13 @@ import com.blogProject.common.member.dto.model.MemberDto;
 import com.blogProject.common.member.entity.Member;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
+import com.blogProject.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,9 @@ public class AuthService {
   // 회원가입
   @Transactional
   public MemberDto signup(Signup request) {
-    validateMemberExists(request.getEmail());
+    if (memberRepository.existsByEmail(request.getEmail())) {
+      throw new MemberException(MEMBER_ALREADY_EXISTS);
+    }
 
     Member savedMember = memberRepository.save(
         request.toEntity(passwordEncoder.encode(request.getPassword())));
@@ -36,17 +41,16 @@ public class AuthService {
     return MemberDto.fromEntity(savedMember);
   }
 
-  private void validateMemberExists(String email) {
-    if (memberRepository.existsByEmail(email)) {
-      throw new MemberException(MEMBER_ALREADY_EXISTS);
-    }
-  }
-
   // 로그인
   public MemberDto signin(Signin request) {
-    Authentication authentication = authenticationManagerBuilder.getObject()
-        .authenticate(new UsernamePasswordAuthenticationToken(
-            request.email(), request.password()));
-    return MemberDto.fromEntity((Member) authentication.getPrincipal());
+    try {
+      Authentication authentication = authenticationManagerBuilder.getObject()
+          .authenticate(new UsernamePasswordAuthenticationToken(
+              request.email(), request.password()));
+      return MemberDto.fromEntity((Member) authentication.getPrincipal());
+    } catch (UsernameNotFoundException | BadCredentialsException e) {
+      throw new MemberException(ErrorCode.INVALID_LOGIN_REQUEST);
+    }
   }
 }
+

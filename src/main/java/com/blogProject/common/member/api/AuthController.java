@@ -2,13 +2,14 @@ package com.blogProject.common.member.api;
 
 
 import com.blogProject.common.member.dto.Signin;
+import com.blogProject.common.member.dto.SigninResponse;
 import com.blogProject.common.member.dto.Signup;
 import com.blogProject.common.member.dto.model.MemberDto;
 import com.blogProject.common.member.service.AuthService;
 import com.blogProject.config.jwt.TokenProvider;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,21 +26,21 @@ public class AuthController {
 
   // 회원가입
   @PostMapping("/signup")
-  public ResponseEntity<MemberDto> signup(@RequestBody @Valid Signup request) {
-    return ResponseEntity.ok(authService.signup(request));
+  public ResponseEntity<MemberDto> signup(@Valid @RequestBody Signup request) {
+    MemberDto memberDto = authService.signup(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(memberDto);
   }
+
 
   // 로그인
   @PostMapping("/signin")
-  public ResponseEntity<MemberDto> signin(@RequestBody @Valid Signin request) {
+  public ResponseEntity<SigninResponse> signin(@Valid @RequestBody Signin request) {
     MemberDto memberDto = authService.signin(request);
     String token = tokenProvider.generateToken(memberDto);
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.set(HttpHeaders.AUTHORIZATION, token);
+    SigninResponse signinResponse = new SigninResponse(token, memberDto);
 
-    return ResponseEntity.ok()
-        .headers(headers)
-        .body(memberDto);
+    return ResponseEntity.ok(signinResponse);
   }
+
 }

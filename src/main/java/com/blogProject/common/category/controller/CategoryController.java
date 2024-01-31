@@ -1,7 +1,6 @@
 package com.blogProject.common.category.controller;
 
 import com.blogProject.common.category.dto.CategoryDto;
-import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.service.CategoryService;
 import java.util.List;
 import javax.validation.Valid;
@@ -24,38 +23,33 @@ public class CategoryController {
 
   private final CategoryService categoryService;
 
-  // 카테고리 생성
+  // 카테고리 생성 API
   @PostMapping
-  public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
-    try {
-      CategoryDto responseDto = categoryService.createCategory(categoryDto.getCategoryName());
-      return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-    } catch (CategoryException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
+    CategoryDto responseDto = categoryService.createCategory(categoryDto.getCategoryName());
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
   }
 
-  // 카테고리 전체 보기
+  // 카테고리 조회 API
   @GetMapping
-  public ResponseEntity<?> allCategory() {
+  public ResponseEntity<List<CategoryDto>> allCategory() {
     List<CategoryDto> categoryDtos = categoryService.getAllCategory();
-    return new ResponseEntity<>(categoryDtos, HttpStatus.OK);
+    return ResponseEntity.ok(categoryDtos);
   }
 
-  // 카테고리 수정
+  // 카테고리 수정 API
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateCategory(@PathVariable Long id,
+  public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id,
       @Valid @RequestBody CategoryDto categoryDto) {
     CategoryDto responseDto = categoryService.updateCategory(id, categoryDto);
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    return ResponseEntity.ok(responseDto);
   }
 
-  // 카테고리 삭제
+  // 카테고리 삭제 API
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+  public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
     categoryService.deleteCategory(id);
-    return new ResponseEntity<>("성공적으로 삭제 되었습니다.", HttpStatus.OK);
+    return ResponseEntity.ok("성공적으로 삭제 되었습니다.");
   }
-
 }
 

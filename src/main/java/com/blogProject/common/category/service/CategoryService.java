@@ -31,8 +31,7 @@ public class CategoryService {
   }
 
   public CategoryDto getCategory(Long id) {
-    Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
+    Category category = findCategory(id);
     return categoryConverter.entityToDto(category);
   }
 
@@ -48,8 +47,7 @@ public class CategoryService {
     if (categoryRepository.existsByName(categoryName)) {
       throw new CategoryException(ErrorCode.CATEGORY_NOT_FOUND, categoryName);
     }
-    Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
+    Category category = findCategory(id);
 
     category.setName(categoryName);
     Category updatedCategory = categoryRepository.save(category);
@@ -58,8 +56,12 @@ public class CategoryService {
 
   @Transactional
   public void deleteCategory(Long id) {
-    Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
+    Category category = findCategory(id);
     categoryRepository.delete(category);
+  }
+
+  public Category findCategory(Long id) {
+    return categoryRepository.findById(id)
+        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
   }
 }

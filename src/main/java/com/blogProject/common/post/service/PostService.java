@@ -72,7 +72,7 @@ public class PostService {
 
   // 게시글 삭제
   @Transactional
-  @PreAuthorize("isAuthenticated() and @postRepository.findById(#id).orElse(null)?.memberName == principal.username")
+  @PreAuthorize("isAuthenticated() and @postRepository.findById(#id).orElse(null)?.member.email == principal.username")
   public void deletePost(Long id) {
     Post post = findPost(id);
     postRepository.delete(post);

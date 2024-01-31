@@ -27,49 +27,49 @@ public class PostController {
 
   // 게시판 생성 API
   @PostMapping
-  public ResponseEntity<?> createPost(@RequestBody PostDto postDto,
+  public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto,
       @RequestParam(required = false) String categoryName,
       @AuthenticationPrincipal UserDetails userDetails) {
     PostDto newPostDto =
         (categoryName != null) ? postService.createPostWithCategory(postDto, categoryName,
             userDetails)
             : postService.createPost(postDto, userDetails);
-    return new ResponseEntity<>(newPostDto, HttpStatus.OK);
+    return ResponseEntity.status(HttpStatus.CREATED).body(newPostDto);
   }
 
-  // 게시판 조회 API
-  @GetMapping("/get/{id}")
-  public ResponseEntity<?> getPostById(@PathVariable Long id) {
+  // 게시글 조회 API
+  @GetMapping("/{id}")
+  public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
     PostDto postDto = postService.getPostById(id);
-    return new ResponseEntity<>(postDto, HttpStatus.OK);
+    return ResponseEntity.ok(postDto);
   }
 
-  // 게시판 조회 API(최신순)
-  @GetMapping("/get")
-  public ResponseEntity<?> getAllPosts() {
+  // 게시글 전체 조회(최신순) API
+  @GetMapping
+  public ResponseEntity<List<PostDto>> getAllPosts() {
     List<PostDto> postDtos = postService.getAllPosts();
-    return new ResponseEntity<>(postDtos, HttpStatus.OK);
+    return ResponseEntity.ok(postDtos);
   }
 
-  // 게시판 수정 API
+  // 게시글 수정 API
   @PatchMapping("/{id}")
-  public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody PostDto postDto) {
+  public ResponseEntity<PostDto> updatePost(@PathVariable Long id, @RequestBody PostDto postDto) {
     PostDto updatedPost = postService.updatePost(id, postDto);
-    return new ResponseEntity<>(updatedPost, HttpStatus.OK);
+    return ResponseEntity.ok(updatedPost);
   }
 
-  // 삭제 API
+  // 게시글 삭제 API
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deletePost(@PathVariable Long id) {
+  public ResponseEntity<String> deletePost(@PathVariable Long id) {
     postService.deletePost(id);
-    return new ResponseEntity<>("성공적으로 삭제 되었습니다. ", HttpStatus.OK);
+    return ResponseEntity.ok("성공적으로 삭제되었습니다.");
   }
 
-  // 검색 API
-  @GetMapping("/get/search")
-  public ResponseEntity<?> searchPosts(@RequestParam String keyword) {
+  // 게시글 검색 (본문 + 제목) API
+  @GetMapping("/search")
+  public ResponseEntity<List<PostDto>> searchPosts(@RequestParam String keyword) {
     List<PostDto> posts = postService.searchPosts(keyword);
-    return new ResponseEntity<>(posts, HttpStatus.OK);
+    return ResponseEntity.ok(posts);
   }
 
 }

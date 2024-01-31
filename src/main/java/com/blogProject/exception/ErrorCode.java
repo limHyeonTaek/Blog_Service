@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+  // auth
+  INVALID_LOGIN_REQUEST(BAD_REQUEST, "잘못된 로그인 요청 입니다."),
+
   // member
   MEMBER_NOT_FOUND(NOT_FOUND, "회원을 찾을 수 없습니다."),
   MEMBER_ALREADY_EXISTS(BAD_REQUEST, "이미 존재하는 회원입니다."),
