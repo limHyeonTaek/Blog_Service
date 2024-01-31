@@ -1,6 +1,7 @@
 ### create post
 POST {{host}}/api/post
 Content-Type: application/json
+Authorization: Bearer {{$auth.token()}}
 
 {
   "title": "post",
@@ -15,8 +16,9 @@ GET {{host}}/api/post
 GET {{host}}/api/post/{{id}}
 
 ### post update
-PATCH {{host}}/api/post/{{id}}
+PATCH {{host}}/api/post/1
 Content-Type: application/json
+Authorization: Bearer {{$auth.token()}}
 
 {
   "title": "updateTitile",
@@ -25,7 +27,8 @@ Content-Type: application/json
 
 ### delete post
 DELETE {{host}}/api/post/{{id}}
+Authorization: Bearer {{$auth.token()}}
 
 ### search post
-GET {{host}}/api/post/search?keyword={{keyword}}
+GET {{host}}/api/post/get/search?keyword={{keyword}}
 

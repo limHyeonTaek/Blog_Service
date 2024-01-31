@@ -1,6 +1,7 @@
 ### create category
 POST {{host}}/api/category
 Content-Type: application/json
+Authorization: Bearer {{$auth.token()}}
 
 {
   "categoryName": "category12"
@@ -8,11 +9,15 @@ Content-Type: application/json
 
 ### all category
 GET {{host}}/api/category
+Authorization: Bearer {{$auth.token()}}
+
 
 
 ### update category
 PUT {{host}}/api/category/{{id}}
 Content-Type: application/json
+Authorization: Bearer {{$auth.token()}}
+
 
 {
   "categoryName": "updateCategory"
@@ -20,3 +25,4 @@ Content-Type: application/json
 
 ### delete category
 DELETE {{host}}/api/category/{{id}}
+Authorization: Bearer {{$auth.token()}}
