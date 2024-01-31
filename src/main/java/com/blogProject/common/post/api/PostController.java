@@ -6,6 +6,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,10 +28,12 @@ public class PostController {
   // 게시판 생성 API
   @PostMapping
   public ResponseEntity<?> createPost(@RequestBody PostDto postDto,
-      @RequestParam(required = false) String categoryName) {
+      @RequestParam(required = false) String categoryName,
+      @AuthenticationPrincipal UserDetails userDetails) {
     PostDto newPostDto =
-        (categoryName != null) ? postService.createPostWithCategory(postDto, categoryName)
-            : postService.createPost(postDto);
+        (categoryName != null) ? postService.createPostWithCategory(postDto, categoryName,
+            userDetails)
+            : postService.createPost(postDto, userDetails);
     return new ResponseEntity<>(newPostDto, HttpStatus.OK);
   }
 

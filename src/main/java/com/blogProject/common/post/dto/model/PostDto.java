@@ -23,6 +23,8 @@ public class PostDto {
 
   private String categoryName;
 
+  private String memberName;
+
   private LocalDateTime createdDate;
 
   private LocalDateTime updatedDate;

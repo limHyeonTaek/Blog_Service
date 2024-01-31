@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
+
   List<Post> findAllByOrderByCreatedDateDesc();
 
   @Query("SELECT p FROM Post p WHERE p.title LIKE %?1% OR p.contents LIKE %?1%")

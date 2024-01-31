@@ -2,6 +2,7 @@ package com.blogProject.common.post.entity;
 
 import com.blogProject.common.category.entity.Category;
 import com.blogProject.common.entity.BaseTimeEntity;
+import com.blogProject.common.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,4 +38,8 @@ public class Post extends BaseTimeEntity {
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "category_id")
   private Category category;
+
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
 }

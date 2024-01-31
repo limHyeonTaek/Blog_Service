@@ -11,6 +11,8 @@ import com.blogProject.common.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -21,21 +23,21 @@ public class PostService {
   private final CategoryRepository categoryRepository;
   private final PostConverter postConverter;
 
-
   // 게시글 생성 (카테고리 없이도 생성 가능)
-  public PostDto createPost(PostDto postDto) {
-    Post post = postConverter.dtoToEntity(postDto);
+  public PostDto createPost(PostDto postDto, UserDetails userDetails) {
+    Post post = postConverter.dtoToEntity(postDto, userDetails);
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
   }
 
   // 게시글을 생성할 때 카테고리도 같이 설정
   @Transactional
-  public PostDto createPostWithCategory(PostDto postDto, String categoryName) {
+  public PostDto createPostWithCategory(PostDto postDto, String categoryName,
+      UserDetails userDetails) {
     Category category = categoryRepository.findByName(categoryName)
         .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
     postDto.setCategoryName(categoryName);
-    Post post = postConverter.dtoToEntity(postDto);
+    Post post = postConverter.dtoToEntity(postDto, userDetails);
     post.setCategory(category);
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
@@ -56,6 +58,8 @@ public class PostService {
 
   // 게시글 수정
   @Transactional
+  @PostAuthorize("isAuthenticated() " +
+      "and returnObject.memberName == principal.username")
   public PostDto updatePost(Long id, PostDto postDto) {
     Post post = postRepository.findById(id)
         .orElseThrow(() -> new PostNotfoundException("게시된 글이 존재하지 않습니다."));
