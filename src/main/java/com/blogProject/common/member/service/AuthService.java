@@ -25,12 +25,7 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-  /**
-   * 회원가입<br> 이미 등록된 회원인지 확인 후 회원가입을 진행합니다.
-   *
-   * @param request 가입 요청 정보
-   * @return 가입한 유저 정보
-   */
+  // 회원가입
   @Transactional
   public MemberDto signup(Signup request) {
     validateMemberExists(request.getEmail());
@@ -47,12 +42,7 @@ public class AuthService {
     }
   }
 
-  /**
-   * 로그인 로그인 요청 정보를 spring security의 authenticate 메소드로 검증합니다. (email 검증, 패스워드 매치)
-   *
-   * @param request 로그인 요청 정보
-   * @return 로그인 정보
-   */
+  // 로그인
   public MemberDto signin(Signin request) {
     Authentication authentication = authenticationManagerBuilder.getObject()
         .authenticate(new UsernamePasswordAuthenticationToken(
