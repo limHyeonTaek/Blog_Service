@@ -1,7 +1,7 @@
 package com.blogProject.common.category.controller;
 
 import com.blogProject.common.category.dto.CategoryDto;
-import com.blogProject.common.category.exception.NameAlreadyExistsException;
+import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.service.CategoryService;
 import java.util.List;
 import javax.validation.Valid;
@@ -30,7 +30,7 @@ public class CategoryController {
     try {
       CategoryDto responseDto = categoryService.createCategory(categoryDto.getCategoryName());
       return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-    } catch (NameAlreadyExistsException e) {
+    } catch (CategoryException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }

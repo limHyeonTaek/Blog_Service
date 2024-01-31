@@ -3,9 +3,9 @@ package com.blogProject.common.category.service;
 import com.blogProject.common.category.converter.CategoryConverter;
 import com.blogProject.common.category.dto.CategoryDto;
 import com.blogProject.common.category.entity.Category;
-import com.blogProject.common.category.exception.CategoryNotFoundException;
-import com.blogProject.common.category.exception.NameAlreadyExistsException;
+import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.repository.CategoryRepository;
+import com.blogProject.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ public class CategoryService {
   @Transactional
   public CategoryDto createCategory(String categoryName) {
     if (categoryRepository.existsByName(categoryName)) {
-      throw new NameAlreadyExistsException("'" + categoryName + "' 이름의 카테고리가 이미 존재합니다. ");
+      throw new CategoryException(ErrorCode.CATEGORY_ALREADY_EXISTS, categoryName);
     }
 
     Category category = new Category();
@@ -32,7 +32,7 @@ public class CategoryService {
 
   public CategoryDto getCategory(Long id) {
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
+        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
     return categoryConverter.entityToDto(category);
   }
 
@@ -46,10 +46,10 @@ public class CategoryService {
   public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
     String categoryName = categoryDto.getCategoryName();
     if (categoryRepository.existsByName(categoryName)) {
-      throw new NameAlreadyExistsException("'" + categoryName + "' 이름의 카테고리가 이미 존재합니다.");
+      throw new CategoryException(ErrorCode.CATEGORY_NOT_FOUND, categoryName);
     }
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
+        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
 
     category.setName(categoryName);
     Category updatedCategory = categoryRepository.save(category);
@@ -59,7 +59,7 @@ public class CategoryService {
   @Transactional
   public void deleteCategory(Long id) {
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryNotFoundException("해당 카테고리가 존재하지 않습니다."));
+        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
     categoryRepository.delete(category);
   }
 }
