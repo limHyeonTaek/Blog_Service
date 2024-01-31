@@ -10,13 +10,13 @@ Authorization: Bearer {{$auth.token()}}
 }
 
 ### 전체 post 조회(최신순)
-GET {{host}}/api/post
+GET {{host}}/api/post/get?page=0&size=1
 
 ### post 조회
-GET {{host}}/api/post/{{id}}
+GET {{host}}/api/post/get/{{id}}
 
 ### post update
-PATCH {{host}}/api/post/1
+PATCH {{host}}/api/post/{{id}}
 Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 
@@ -30,5 +30,5 @@ DELETE {{host}}/api/post/{{id}}
 Authorization: Bearer {{$auth.token()}}
 
 ### search post
-GET {{host}}/api/post/get/search?keyword={{keyword}}
+GET {{host}}/api/post/get/search?keyword={{keyword}}&page=0&size=1
 

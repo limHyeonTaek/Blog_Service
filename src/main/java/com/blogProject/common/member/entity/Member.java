@@ -1,10 +1,10 @@
 package com.blogProject.common.member.entity;
 
 import com.blogProject.common.entity.BaseTimeEntity;
-import com.blogProject.common.member.converter.RoleTypeConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,7 +42,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
   @Column(unique = true, nullable = false)
   private String phoneNumber;
 
-  @Convert(converter = RoleTypeConverter.class)
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
 

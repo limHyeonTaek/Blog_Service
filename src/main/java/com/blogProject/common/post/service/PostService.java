@@ -10,8 +10,9 @@ import com.blogProject.common.post.exception.PostException;
 import com.blogProject.common.post.repository.PostRepository;
 import com.blogProject.exception.ErrorCode;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,10 +53,11 @@ public class PostService {
   }
 
   // 전체 게시글 조회 (최신순으로)
-  public List<PostDto> getAllPosts() {
-    List<Post> posts = postRepository.findAllByOrderByCreatedDateDesc();
-    return postConverter.entityToDto(posts);
+  public Page<PostDto> getAllPosts(Pageable pageable) {
+    Page<Post> posts = postRepository.findAllByOrderByCreatedDateDesc(pageable);
+    return posts.map(postConverter::entityToDto);
   }
+
 
   // 게시글 수정
   @Transactional
@@ -79,9 +81,10 @@ public class PostService {
   }
 
   // 제목이나 본문 일부만 검색만으로 검색가능
-  public List<PostDto> searchPosts(String keyword) {
-    List<Post> postdtos = postRepository.findByTitleContainingOrContentContaining(keyword);
-    return postConverter.entityToDto(postdtos);
+  public Page<PostDto> searchPosts(String keyword, Pageable pageable) {
+    Page<Post> postdtos = postRepository.findByTitleContainingOrContentContaining(keyword,
+        pageable);
+    return postdtos.map(postConverter::entityToDto);
   }
 
   public Post findPost(Long id) {

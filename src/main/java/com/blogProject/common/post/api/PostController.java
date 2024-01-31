@@ -2,8 +2,9 @@ package com.blogProject.common.post.api;
 
 import com.blogProject.common.post.dto.model.PostDto;
 import com.blogProject.common.post.service.PostService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,18 +39,19 @@ public class PostController {
   }
 
   // 게시글 조회 API
-  @GetMapping("/{id}")
+  @GetMapping("/get/{id}")
   public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
     PostDto postDto = postService.getPostById(id);
     return ResponseEntity.ok(postDto);
   }
 
   // 게시글 전체 조회(최신순) API
-  @GetMapping
-  public ResponseEntity<List<PostDto>> getAllPosts() {
-    List<PostDto> postDtos = postService.getAllPosts();
+  @GetMapping("/get")
+  public ResponseEntity<Page<PostDto>> getAllPosts(Pageable pageable) {
+    Page<PostDto> postDtos = postService.getAllPosts(pageable);
     return ResponseEntity.ok(postDtos);
   }
+
 
   // 게시글 수정 API
   @PatchMapping("/{id}")
@@ -66,9 +68,10 @@ public class PostController {
   }
 
   // 게시글 검색 (본문 + 제목) API
-  @GetMapping("/search")
-  public ResponseEntity<List<PostDto>> searchPosts(@RequestParam String keyword) {
-    List<PostDto> posts = postService.searchPosts(keyword);
+  @GetMapping("/get/search")
+  public ResponseEntity<Page<PostDto>> searchPosts(@RequestParam String keyword,
+      Pageable pageable) {
+    Page<PostDto> posts = postService.searchPosts(keyword, pageable);
     return ResponseEntity.ok(posts);
   }
 

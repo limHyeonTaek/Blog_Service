@@ -1,6 +1,7 @@
 package com.blogProject.config.jwt;
 
 import com.blogProject.common.member.dto.model.MemberDto;
+import com.blogProject.common.member.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -39,7 +40,7 @@ public class TokenProvider {
 
   // 토큰생성
   public String generateToken(MemberDto memberDto) {
-    String authorities = memberDto.getRole().getKey();
+    Role authorities = memberDto.getRole();
 
     Date now = new Date();
     Date expiredDate = new Date(now.getTime() + TOKEN_EXPIRE_TIME);

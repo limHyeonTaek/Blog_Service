@@ -38,9 +38,7 @@ public class AuthController {
     MemberDto memberDto = authService.signin(request);
     String token = tokenProvider.generateToken(memberDto);
 
-    SigninResponse signinResponse = new SigninResponse(token, memberDto);
-
-    return ResponseEntity.ok(signinResponse);
+    return ResponseEntity.ok(new SigninResponse(token, memberDto));
   }
 
 }

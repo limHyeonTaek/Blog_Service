@@ -3,7 +3,6 @@ package com.blogProject.common.post.converter;
 import com.blogProject.common.category.entity.Category;
 import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.repository.CategoryRepository;
-import com.blogProject.common.member.entity.Member;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
 import com.blogProject.common.post.dto.model.PostDto;
@@ -12,6 +11,7 @@ import com.blogProject.exception.ErrorCode;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ public class PostConverter {
     return postDto;
   }
 
-  public List<PostDto> entityToDto(List<Post> posts) {
+  public List<PostDto> entityToDto(Page<Post> posts) {
     return posts.stream().map(this::entityToDto).collect(Collectors.toList());
   }
 
@@ -43,7 +43,7 @@ public class PostConverter {
     Post post = new Post();
     post.setTitle(postDto.getTitle());
     post.setContents(postDto.getContents());
-    post.setMember((Member) memberRepository.findByEmail(userDetails.getUsername())
+    post.setMember(memberRepository.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND)));
 
     if (postDto.getCategoryName() != null) {

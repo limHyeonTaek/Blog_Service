@@ -11,15 +11,15 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Role {
-  USER("ROLE_USER"),
-  ADMIN("ROLE_ADMIN");
+  USER("USER"),
+  ADMIN("ADMIN");
 
   private final String key;
 
   public static Role fromKey(String key) {
     return Arrays.stream(values())
         .filter(o -> o.getKey().equals(key))
-        .findFirst()
+        .findAny()
         .orElseThrow(() -> new MemberException(
             INVALID_REQUEST));
   }
