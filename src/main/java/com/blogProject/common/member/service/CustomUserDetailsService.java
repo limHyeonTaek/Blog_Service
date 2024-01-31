@@ -2,11 +2,13 @@ package com.blogProject.common.member.service;
 
 import static com.blogProject.exception.ErrorCode.MEMBER_NOT_FOUND;
 
+import com.blogProject.common.member.dto.model.MemberDto;
+import com.blogProject.common.member.entity.Member;
+import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
@@ -17,9 +19,9 @@ public class CustomUserDetailsService implements UserDetailsService {
   private final MemberRepository memberRepository;
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    return memberRepository.findByEmail(username)
-        .orElseThrow(() -> new UsernameNotFoundException(
-            MEMBER_NOT_FOUND.getMessage()));
+  public UserDetails loadUserByUsername(String username) {
+    Member member = memberRepository.findByEmail(username)
+        .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+    return MemberDto.fromEntity(member);
   }
 }

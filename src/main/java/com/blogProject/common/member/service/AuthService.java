@@ -47,7 +47,7 @@ public class AuthService {
       Authentication authentication = authenticationManagerBuilder.getObject()
           .authenticate(new UsernamePasswordAuthenticationToken(
               request.email(), request.password()));
-      return MemberDto.fromEntity((Member) authentication.getPrincipal());
+      return (MemberDto) authentication.getPrincipal();
     } catch (UsernameNotFoundException | BadCredentialsException e) {
       throw new MemberException(ErrorCode.INVALID_LOGIN_REQUEST);
     }
