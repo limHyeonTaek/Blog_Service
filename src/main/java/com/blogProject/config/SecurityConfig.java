@@ -39,7 +39,7 @@ public class SecurityConfig {
         .authorizeHttpRequests((request) ->
             request.requestMatchers(
                     new AntPathRequestMatcher("/**/post/get/**"),
-                    new AntPathRequestMatcher("/**/member/**"),
+                    new AntPathRequestMatcher("/**/auth/**"),
                     new AntPathRequestMatcher("/**/post/get")
                 ).permitAll()
                 .anyRequest().authenticated()

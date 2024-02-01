@@ -1,4 +1,4 @@
-package com.blogProject.common.category.controller;
+package com.blogProject.common.category.api;
 
 import com.blogProject.common.category.dto.CategoryDto;
 import com.blogProject.common.category.service.CategoryService;
@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,8 +48,9 @@ public class CategoryController {
 
   // 카테고리 삭제 API
   @DeleteMapping("/{id}")
-  public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
-    categoryService.deleteCategory(id);
+  public ResponseEntity<String> deleteCategory(@PathVariable Long id,
+      Authentication authentication) {
+    categoryService.deleteCategory(id, authentication);
     return ResponseEntity.ok("성공적으로 삭제 되었습니다.");
   }
 }

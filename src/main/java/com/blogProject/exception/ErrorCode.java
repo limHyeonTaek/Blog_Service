@@ -23,7 +23,10 @@ public enum ErrorCode {
   CATEGORY_ALREADY_EXISTS(BAD_REQUEST, "이미 존재하는 카테고리 입니다."),
 
   // post
-  POST_NOT_FOUND(NOT_FOUND, "게시글을 찾을 수 없습니다.");
+  POST_NOT_FOUND(NOT_FOUND, "게시글을 찾을 수 없습니다."),
+
+  // global
+  ACCESS_DENIED_EXCEPTION(BAD_REQUEST, "금지된 접근입니다.");
 
 
   private final HttpStatus status;

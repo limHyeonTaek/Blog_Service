@@ -31,7 +31,8 @@ public class AuthService {
   // 회원가입
   @Transactional
   public MemberDto signup(Signup request) {
-    if (memberRepository.existsByEmail(request.getEmail())) {
+    if (memberRepository.existsByEmail(request.getEmail()) ||
+        memberRepository.existsByName(request.getName())) {
       throw new MemberException(MEMBER_ALREADY_EXISTS);
     }
 

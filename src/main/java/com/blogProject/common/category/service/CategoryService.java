@@ -1,15 +1,22 @@
 package com.blogProject.common.category.service;
 
+import static com.blogProject.exception.ErrorCode.ACCESS_DENIED_EXCEPTION;
+import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
+
 import com.blogProject.common.category.converter.CategoryConverter;
 import com.blogProject.common.category.dto.CategoryDto;
 import com.blogProject.common.category.entity.Category;
 import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.repository.CategoryRepository;
+import com.blogProject.common.post.entity.Post;
+import com.blogProject.common.post.repository.PostRepository;
 import com.blogProject.exception.ErrorCode;
+import com.blogProject.exception.GlobalException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -18,6 +25,7 @@ public class CategoryService {
 
   private final CategoryRepository categoryRepository;
   private final CategoryConverter categoryConverter;
+  private final PostRepository postRepository;
 
   @Transactional
   public CategoryDto createCategory(String categoryName) {
@@ -36,8 +44,7 @@ public class CategoryService {
   }
 
   public List<CategoryDto> getAllCategory() {
-    return categoryRepository.findAll().stream()
-        .map(categoryConverter::entityToDto)
+    return categoryRepository.findAll().stream().map(categoryConverter::entityToDto)
         .collect(Collectors.toList());
   }
 
@@ -45,7 +52,7 @@ public class CategoryService {
   public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
     String categoryName = categoryDto.getCategoryName();
     if (categoryRepository.existsByName(categoryName)) {
-      throw new CategoryException(ErrorCode.CATEGORY_NOT_FOUND, categoryName);
+      throw new CategoryException(CATEGORY_NOT_FOUND, categoryName);
     }
     Category category = findCategory(id);
 
@@ -55,13 +62,29 @@ public class CategoryService {
   }
 
   @Transactional
-  public void deleteCategory(Long id) {
+  public void deleteCategory(Long id, Authentication authentication) {
+    Post post = postRepository.findById(id).orElse(null);
+    if (post != null && !post.getMember().getEmail().equals(authentication.getName())) {
+      throw new GlobalException(ACCESS_DENIED_EXCEPTION);
+    }
     Category category = findCategory(id);
+    removeCategoryFromPosts(id);
     categoryRepository.delete(category);
   }
 
   public Category findCategory(Long id) {
     return categoryRepository.findById(id)
-        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND));
+        .orElseThrow(() -> new CategoryException(CATEGORY_NOT_FOUND));
+  }
+
+  private void removeCategoryFromPosts(Long categoryId) {
+    List<Post> posts = postRepository.findByCategoryId(categoryId);
+
+    if (posts != null) {
+      for (Post post : posts) {
+        post.setCategory(null);
+      }
+      postRepository.saveAll(posts);
+    }
   }
 }

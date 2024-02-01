@@ -39,7 +39,8 @@ public class Post extends BaseTimeEntity {
   @JoinColumn(name = "category_id")
   private Category category;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "member_id")
   private Member member;
+
 }

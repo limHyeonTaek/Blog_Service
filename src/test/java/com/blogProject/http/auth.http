@@ -1,5 +1,5 @@
 ### signup 회원가입
-POST {{host}}/api/member/signup
+POST {{host}}/api/auth/signup
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### signin 로그인
-POST {{host}}/api/member/signin
+POST {{host}}/api/auth/signin
 Content-Type: application/json
 
 {

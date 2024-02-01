@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @AllArgsConstructor
 public class MemberDto implements UserDetails {
 
+  private Long memberId;
   private String name;
   private String email;
   private String password;
@@ -27,6 +28,7 @@ public class MemberDto implements UserDetails {
 
   public static MemberDto fromEntity(Member member) {
     return MemberDto.builder()
+        .memberId(member.getId())
         .name(member.getName())
         .email(member.getEmail())
         .password(member.getPassword())
