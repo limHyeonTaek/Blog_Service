@@ -4,7 +4,7 @@ Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 
 {
-  "categoryName": "category12"
+  "categoryName": "category"
 }
 
 ### all category

@@ -19,6 +19,5 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(errorCode, message));
   }
 
-  // 다른 예외 처리 메서드들...
 }
 

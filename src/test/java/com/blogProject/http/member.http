@@ -1,0 +1,14 @@
+### upadate Member Name, PhoneNumber
+PUT {{host}}/api/member/edit/1
+Content-Type: application/json
+Authorization: Bearer {{$auth.token()}}
+
+{
+  "name": "EditName",
+  "phoneNumber": "01092838211"
+}
+
+
+### delete Member
+DELETE {{host}}/api/member/{{id}}
+Authorization: Bearer {{$auth.token()}}

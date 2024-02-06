@@ -1,14 +1,21 @@
 package com.blogProject.common.post.service;
 
+import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
+import static com.blogProject.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.blogProject.exception.ErrorCode.MEMBER_WITHDRAWAL;
+import static com.blogProject.exception.ErrorCode.POST_NOT_FOUND;
+
 import com.blogProject.common.category.entity.Category;
 import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.repository.CategoryRepository;
+import com.blogProject.common.member.entity.Member;
+import com.blogProject.common.member.exception.MemberException;
+import com.blogProject.common.member.repository.MemberRepository;
 import com.blogProject.common.post.converter.PostConverter;
 import com.blogProject.common.post.dto.model.PostDto;
 import com.blogProject.common.post.entity.Post;
 import com.blogProject.common.post.exception.PostException;
 import com.blogProject.common.post.repository.PostRepository;
-import com.blogProject.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,26 +32,45 @@ public class PostService {
   private final PostRepository postRepository;
   private final CategoryRepository categoryRepository;
   private final PostConverter postConverter;
+  private final MemberRepository memberRepository;
 
   // 게시글 생성 (카테고리 없이도 생성 가능)
+  @Transactional
   public PostDto createPost(PostDto postDto, UserDetails userDetails) {
-    Post post = postConverter.dtoToEntity(postDto, userDetails);
+    Member member = getMember(userDetails);
+    isDeleted(member);
+    Post post = postConverter.dtoToEntity(postDto, member);
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
   }
 
-  // 게시글을 생성할 때 카테고리도 같이 설정
+  // 게시글 카테고리와 함꼐 생성
   @Transactional
   public PostDto createPostWithCategory(PostDto postDto, String categoryName,
       UserDetails userDetails) {
+    Member member = getMember(userDetails);
+    isDeleted(member);
     Category category = categoryRepository.findByName(categoryName)
-        .orElseThrow(() -> new CategoryException(ErrorCode.CATEGORY_NOT_FOUND, categoryName));
+        .orElseThrow(() -> new CategoryException(CATEGORY_NOT_FOUND, categoryName));
     postDto.setCategoryName(categoryName);
-    Post post = postConverter.dtoToEntity(postDto, userDetails);
+    Post post = postConverter.dtoToEntity(postDto, member);
     post.setCategory(category);
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
   }
+
+  private static void isDeleted(Member member) {
+    if (member.isDeleted()) {
+      throw new MemberException(MEMBER_WITHDRAWAL);
+    }
+  }
+
+
+  private Member getMember(UserDetails userDetails) {
+    return memberRepository.findByEmail(userDetails.getUsername())
+        .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+  }
+
 
   // 게시글 조회
   public PostDto getPostById(Long id) {
@@ -89,7 +115,7 @@ public class PostService {
 
   public Post findPost(Long id) {
     return postRepository.findById(id)
-        .orElseThrow(() -> new PostException(ErrorCode.POST_NOT_FOUND));
+        .orElseThrow(() -> new PostException(POST_NOT_FOUND));
   }
 
 

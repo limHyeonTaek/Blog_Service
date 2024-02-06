@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/api/member")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @RestController
 public class AuthController {
@@ -26,9 +26,9 @@ public class AuthController {
 
   // 회원가입
   @PostMapping("/signup")
-  public ResponseEntity<MemberDto> signup(@Valid @RequestBody Signup request) {
+  public ResponseEntity<String> signup(@Valid @RequestBody Signup request) {
     MemberDto memberDto = authService.signup(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(memberDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(memberDto.getEmail());
   }
 
 
@@ -38,7 +38,7 @@ public class AuthController {
     MemberDto memberDto = authService.signin(request);
     String token = tokenProvider.generateToken(memberDto);
 
-    return ResponseEntity.ok(new SigninResponse(token, memberDto));
+    return ResponseEntity.ok(new SigninResponse(token, memberDto.getEmail()));
   }
 
 }
