@@ -26,7 +26,11 @@ public enum ErrorCode {
   // post
   POST_NOT_FOUND(NOT_FOUND, "게시글을 찾을 수 없습니다."),
 
+  //comment
+  COMMENT_NOT_FOUND(NOT_FOUND, "댓글을 찾을 수 없습니다."),
+
   // global
+  ACCESS_DENIED(BAD_REQUEST, "권한이 없습니다."),
   ACCESS_DENIED_EXCEPTION(BAD_REQUEST, "금지된 접근입니다.");
 
 

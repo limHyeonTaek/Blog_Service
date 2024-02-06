@@ -18,23 +18,24 @@ public class CommentDto {
 
   private Long commentId;
   private String comments;
-  private Member member;
-  private Post post;
+  private String member;
+  private Long postId;
 
   public static CommentDto fromEntity(Comment comment) {
     return CommentDto.builder()
         .commentId(comment.getId())
         .comments(comment.getComments())
-        .member(comment.getMember())
-        .post(comment.getPost())
+        .member(comment.getMember().getEmail())
+        .postId(comment.getPost().getId())
         .build();
   }
 
-  public static Comment fromDto(CommentDto commentDto) {
+  public Comment dtoToEntity(CommentDto commentDto, Member member, Post post) {
     return Comment.builder()
+        .id(commentDto.getCommentId())
         .comments(commentDto.getComments())
-        .member(commentDto.getMember())
-        .post(commentDto.getPost())
+        .member(member)
+        .post(post)
         .build();
   }
 }
