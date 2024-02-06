@@ -9,11 +9,8 @@ import com.blogProject.common.member.dto.model.MemberDto;
 import com.blogProject.common.member.entity.Member;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
-import com.blogProject.common.post.entity.Post;
-import com.blogProject.common.post.repository.PostRepository;
 import com.blogProject.exception.GlobalException;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,7 +21,6 @@ import org.springframework.stereotype.Service;
 public class MemberService {
 
   private final MemberRepository memberRepository;
-  private final PostRepository postRepository;
 
   public Member findByIdOrThrow(Long id) {
     return memberRepository.findById(id).orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
@@ -42,24 +38,12 @@ public class MemberService {
 
   @Transactional
   public void deleteMember(Long id, Authentication authentication) {
-    Post post = postRepository.findById(id).orElse(null);
-    if (post != null && !post.getMember().getEmail().equals(authentication.getName())) {
+    Member member = findByIdOrThrow(id);
+    if (!member.getEmail().equals(authentication.getName())) {
       throw new GlobalException(ACCESS_DENIED_EXCEPTION);
     }
-    Member member = findByIdOrThrow(id);
-    removeMemberFromPosts(id);
-    memberRepository.delete(member);
-  }
-
-  private void removeMemberFromPosts(Long memberId) {
-    List<Post> posts = postRepository.findByMemberId(memberId);
-
-    if (posts != null) {
-      for (Post post : posts) {
-        post.setMember(null);
-      }
-      postRepository.saveAll(posts);
-    }
+    member.setDeleted(true);
+    memberRepository.save(member);
   }
 
 }

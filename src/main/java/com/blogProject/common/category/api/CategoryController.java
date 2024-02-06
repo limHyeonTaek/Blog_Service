@@ -26,8 +26,10 @@ public class CategoryController {
 
   // 카테고리 생성 API
   @PostMapping
-  public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
-    CategoryDto responseDto = categoryService.createCategory(categoryDto.getCategoryName());
+  public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto,
+      Authentication authentication) {
+    CategoryDto responseDto = categoryService.createCategory(categoryDto.getCategoryName(),
+        authentication);
     return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
   }
 

@@ -2,12 +2,17 @@ package com.blogProject.common.category.service;
 
 import static com.blogProject.exception.ErrorCode.ACCESS_DENIED_EXCEPTION;
 import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
+import static com.blogProject.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.blogProject.exception.ErrorCode.MEMBER_WITHDRAWAL;
 
 import com.blogProject.common.category.converter.CategoryConverter;
 import com.blogProject.common.category.dto.CategoryDto;
 import com.blogProject.common.category.entity.Category;
 import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.repository.CategoryRepository;
+import com.blogProject.common.member.entity.Member;
+import com.blogProject.common.member.exception.MemberException;
+import com.blogProject.common.member.repository.MemberRepository;
 import com.blogProject.common.post.entity.Post;
 import com.blogProject.common.post.repository.PostRepository;
 import com.blogProject.exception.ErrorCode;
@@ -26,9 +31,17 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
   private final CategoryConverter categoryConverter;
   private final PostRepository postRepository;
+  private final MemberRepository memberRepository;
 
   @Transactional
-  public CategoryDto createCategory(String categoryName) {
+  public CategoryDto createCategory(String categoryName, Authentication authentication) {
+    String email = authentication.getName();
+    Member member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+
+    if (member.isDeleted()) {
+      throw new MemberException(MEMBER_WITHDRAWAL);
+    }
     if (categoryRepository.existsByName(categoryName)) {
       throw new CategoryException(ErrorCode.CATEGORY_ALREADY_EXISTS, categoryName);
     }
@@ -78,13 +91,6 @@ public class CategoryService {
   }
 
   private void removeCategoryFromPosts(Long categoryId) {
-    List<Post> posts = postRepository.findByCategoryId(categoryId);
-
-    if (posts != null) {
-      for (Post post : posts) {
-        post.setCategory(null);
-      }
-      postRepository.saveAll(posts);
-    }
+    postRepository.removeCategoryFromPosts(categoryId);
   }
 }

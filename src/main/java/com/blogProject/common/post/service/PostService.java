@@ -2,6 +2,7 @@ package com.blogProject.common.post.service;
 
 import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
 import static com.blogProject.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.blogProject.exception.ErrorCode.MEMBER_WITHDRAWAL;
 import static com.blogProject.exception.ErrorCode.POST_NOT_FOUND;
 
 import com.blogProject.common.category.entity.Category;
@@ -37,6 +38,7 @@ public class PostService {
   @Transactional
   public PostDto createPost(PostDto postDto, UserDetails userDetails) {
     Member member = getMember(userDetails);
+    isDeleted(member);
     Post post = postConverter.dtoToEntity(postDto, member);
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
@@ -47,6 +49,7 @@ public class PostService {
   public PostDto createPostWithCategory(PostDto postDto, String categoryName,
       UserDetails userDetails) {
     Member member = getMember(userDetails);
+    isDeleted(member);
     Category category = categoryRepository.findByName(categoryName)
         .orElseThrow(() -> new CategoryException(CATEGORY_NOT_FOUND, categoryName));
     postDto.setCategoryName(categoryName);
@@ -54,6 +57,12 @@ public class PostService {
     post.setCategory(category);
     post = postRepository.save(post);
     return postConverter.entityToDto(post);
+  }
+
+  private static void isDeleted(Member member) {
+    if (member.isDeleted()) {
+      throw new MemberException(MEMBER_WITHDRAWAL);
+    }
   }
 
 

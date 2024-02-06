@@ -17,6 +17,7 @@ public enum ErrorCode {
   MEMBER_NOT_FOUND(NOT_FOUND, "회원을 찾을 수 없습니다."),
   MEMBER_ALREADY_EXISTS(BAD_REQUEST, "이미 존재하는 회원입니다."),
   INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다."),
+  MEMBER_WITHDRAWAL(BAD_REQUEST, "탈퇴한 회원입니다."),
 
   // category
   CATEGORY_NOT_FOUND(NOT_FOUND, "카테고리를 찾을 수 없습니다."),

@@ -43,4 +43,7 @@ public class Member extends BaseTimeEntity {
   @Column(nullable = false)
   private Role role;
 
+  @Column(nullable = false)
+  private boolean isDeleted = false;
+
 }
