@@ -4,6 +4,7 @@ import static com.blogProject.exception.ErrorCode.ACCESS_DENIED_EXCEPTION;
 import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
 import static com.blogProject.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static com.blogProject.exception.ErrorCode.MEMBER_WITHDRAWAL;
+import static com.blogProject.exception.ErrorCode.POST_NOT_FOUND;
 
 import com.blogProject.common.category.converter.CategoryConverter;
 import com.blogProject.common.category.dto.CategoryDto;
@@ -14,6 +15,7 @@ import com.blogProject.common.member.entity.Member;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
 import com.blogProject.common.post.entity.Post;
+import com.blogProject.common.post.exception.PostException;
 import com.blogProject.common.post.repository.PostRepository;
 import com.blogProject.exception.ErrorCode;
 import com.blogProject.exception.GlobalException;
@@ -76,8 +78,8 @@ public class CategoryService {
 
   @Transactional
   public void deleteCategory(Long id, Authentication authentication) {
-    Post post = postRepository.findById(id).orElse(null);
-    if (post != null && !post.getMember().getEmail().equals(authentication.getName())) {
+    Post post = postRepository.findById(id).orElseThrow(() -> new PostException(POST_NOT_FOUND));
+    if (!post.getMember().getEmail().equals(authentication.getName())) {
       throw new GlobalException(ACCESS_DENIED_EXCEPTION);
     }
     Category category = findCategory(id);
