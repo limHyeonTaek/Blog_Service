@@ -15,6 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostDto {
 
+  private Long PostId;
+
   @NotNull(message = "제목을 입력해 주세요.")
   private String title;
 

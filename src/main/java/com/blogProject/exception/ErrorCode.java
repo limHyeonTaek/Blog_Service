@@ -1,6 +1,7 @@
 package com.blogProject.exception;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import lombok.Getter;
@@ -30,8 +31,8 @@ public enum ErrorCode {
   COMMENT_NOT_FOUND(NOT_FOUND, "댓글을 찾을 수 없습니다."),
 
   // global
-  ACCESS_DENIED(BAD_REQUEST, "권한이 없습니다."),
-  ACCESS_DENIED_EXCEPTION(BAD_REQUEST, "금지된 접근입니다.");
+  ACCESS_DENIED(FORBIDDEN, "권한이 없습니다."),
+  ACCESS_DENIED_EXCEPTION(FORBIDDEN, "금지된 접근입니다.");
 
 
   private final HttpStatus status;
