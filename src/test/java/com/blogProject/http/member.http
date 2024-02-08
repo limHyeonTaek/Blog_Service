@@ -1,5 +1,5 @@
 ### upadate Member Name, PhoneNumber
-PUT {{host}}/api/member/edit/1
+PUT {{host}}/api/member/edit/{{id}}
 Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 

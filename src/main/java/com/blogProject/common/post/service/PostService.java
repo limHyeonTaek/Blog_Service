@@ -22,7 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -36,8 +36,8 @@ public class PostService {
 
   // 게시글 생성 (카테고리 없이도 생성 가능)
   @Transactional
-  public PostDto createPost(PostDto postDto, UserDetails userDetails) {
-    Member member = getMember(userDetails);
+  public PostDto createPost(PostDto postDto, Authentication authentication) {
+    Member member = getMember(authentication);
     isDeleted(member);
     Post post = postConverter.dtoToEntity(postDto, member);
     post = postRepository.save(post);
@@ -47,8 +47,8 @@ public class PostService {
   // 게시글 카테고리와 함꼐 생성
   @Transactional
   public PostDto createPostWithCategory(PostDto postDto, String categoryName,
-      UserDetails userDetails) {
-    Member member = getMember(userDetails);
+      Authentication authentication) {
+    Member member = getMember(authentication);
     isDeleted(member);
     Category category = categoryRepository.findByName(categoryName)
         .orElseThrow(() -> new CategoryException(CATEGORY_NOT_FOUND, categoryName));
@@ -66,8 +66,8 @@ public class PostService {
   }
 
 
-  private Member getMember(UserDetails userDetails) {
-    return memberRepository.findByEmail(userDetails.getUsername())
+  private Member getMember(Authentication authentication) {
+    return memberRepository.findByEmail(authentication.getName())
         .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
   }
 

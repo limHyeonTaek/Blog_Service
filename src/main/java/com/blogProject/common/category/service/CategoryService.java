@@ -1,6 +1,7 @@
 package com.blogProject.common.category.service;
 
 import static com.blogProject.exception.ErrorCode.ACCESS_DENIED_EXCEPTION;
+import static com.blogProject.exception.ErrorCode.CATEGORY_ALREADY_EXISTS;
 import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
 import static com.blogProject.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static com.blogProject.exception.ErrorCode.MEMBER_WITHDRAWAL;
@@ -17,7 +18,6 @@ import com.blogProject.common.member.repository.MemberRepository;
 import com.blogProject.common.post.entity.Post;
 import com.blogProject.common.post.exception.PostException;
 import com.blogProject.common.post.repository.PostRepository;
-import com.blogProject.exception.ErrorCode;
 import com.blogProject.exception.GlobalException;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -45,7 +45,7 @@ public class CategoryService {
       throw new MemberException(MEMBER_WITHDRAWAL);
     }
     if (categoryRepository.existsByName(categoryName)) {
-      throw new CategoryException(ErrorCode.CATEGORY_ALREADY_EXISTS, categoryName);
+      throw new CategoryException(CATEGORY_ALREADY_EXISTS, categoryName);
     }
 
     Category category = new Category();

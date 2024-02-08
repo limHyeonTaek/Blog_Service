@@ -1,6 +1,7 @@
 package com.blogProject.common.member.service;
 
 
+import static com.blogProject.exception.ErrorCode.INVALID_LOGIN_REQUEST;
 import static com.blogProject.exception.ErrorCode.MEMBER_ALREADY_EXISTS;
 
 import com.blogProject.common.member.dto.Signin;
@@ -9,7 +10,6 @@ import com.blogProject.common.member.dto.model.MemberDto;
 import com.blogProject.common.member.entity.Member;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
-import com.blogProject.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,7 +50,7 @@ public class AuthService {
               request.email(), request.password()));
       return (MemberDto) authentication.getPrincipal();
     } catch (UsernameNotFoundException | BadCredentialsException e) {
-      throw new MemberException(ErrorCode.INVALID_LOGIN_REQUEST);
+      throw new MemberException(INVALID_LOGIN_REQUEST);
     }
   }
 }

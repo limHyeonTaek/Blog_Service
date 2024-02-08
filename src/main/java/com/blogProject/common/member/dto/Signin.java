@@ -4,7 +4,9 @@ package com.blogProject.common.member.dto;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import lombok.Builder;
 
+@Builder
 public record Signin(
     @NotBlank
     @Email(message = "이메일 형식으로 입력해 주세요.")

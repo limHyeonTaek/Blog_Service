@@ -51,5 +51,4 @@ public class CommentController {
     return ResponseEntity.ok(commentDtos);
   }
 
-
 }
