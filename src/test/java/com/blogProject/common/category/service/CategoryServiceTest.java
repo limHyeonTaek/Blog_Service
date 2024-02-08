@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,142 +72,150 @@ public class CategoryServiceTest {
     authentication = mock(Authentication.class);
   }
 
-  @Test
-  @DisplayName("카테고리 생성 테스트")
-  void createCategory() {
-    // given
-    when(authentication.getName()).thenReturn(EMAIL);
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-    when(categoryRepository.existsByName(anyString())).thenReturn(false);
-    when(categoryConverter.entityToDto(any(Category.class))).thenReturn(categoryDto);
-    when(categoryRepository.save(any(Category.class))).thenReturn(category);
+  @Nested
+  @DisplayName("카테고리 Service 테스트")
+  class CategoryCRUDTest {
 
-    // when
-    CategoryDto result = categoryService.createCategory(CATEGORY_NAME, authentication);
+    @Test
+    @DisplayName("카테고리 생성 테스트")
+    void createCategory() {
+      // given
+      when(authentication.getName()).thenReturn(EMAIL);
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
+      when(categoryRepository.existsByName(anyString())).thenReturn(false);
+      when(categoryConverter.entityToDto(any(Category.class))).thenReturn(categoryDto);
+      when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-    // then
-    assertEquals(CATEGORY_NAME, result.getCategoryName());
-  }
+      // when
+      CategoryDto result = categoryService.createCategory(CATEGORY_NAME, authentication);
 
-  @Test
-  @DisplayName("카테고리 보기 테스트")
-  void getCategory() {
-    // given
-    when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
-    when(categoryConverter.entityToDto(any(Category.class))).thenReturn(categoryDto);
+      // then
+      assertEquals(CATEGORY_NAME, result.getCategoryName());
+    }
 
-    // when
-    CategoryDto result = categoryService.getCategory(1L);
+    @Test
+    @DisplayName("카테고리 보기 테스트")
+    void getCategory() {
+      // given
+      when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
+      when(categoryConverter.entityToDto(any(Category.class))).thenReturn(categoryDto);
 
-    // then
-    assertEquals(CATEGORY_NAME, result.getCategoryName());
-  }
+      // when
+      CategoryDto result = categoryService.getCategory(1L);
 
-  @Test
-  @DisplayName("카테고리 전체 보기 테스트")
-  void getAllCategory() {
-    // given
-    List<Category> categories = Arrays.asList(category, category);
-    when(categoryRepository.findAll()).thenReturn(categories);
-    when(categoryConverter.entityToDto(any(Category.class))).thenReturn(categoryDto);
+      // then
+      assertEquals(CATEGORY_NAME, result.getCategoryName());
+    }
 
-    // when
-    List<CategoryDto> result = categoryService.getAllCategory();
+    @Test
+    @DisplayName("카테고리 전체 보기 테스트")
+    void getAllCategory() {
+      // given
+      List<Category> categories = Arrays.asList(category, category);
+      when(categoryRepository.findAll()).thenReturn(categories);
+      when(categoryConverter.entityToDto(any(Category.class))).thenReturn(categoryDto);
 
-    // then
-    assertEquals(2, result.size());
-    assertEquals(CATEGORY_NAME, result.get(0).getCategoryName());
-    assertEquals(CATEGORY_NAME, result.get(1).getCategoryName());
-  }
+      // when
+      List<CategoryDto> result = categoryService.getAllCategory();
 
-  @Test
-  @DisplayName("카테고리 수정 테스트")
-  void updateCategory() {
-    // given
-    CategoryDto updatedCategoryDto = new CategoryDto();
-    updatedCategoryDto.setCategoryName(UPDATE_CATEGORY_NAME);
-    when(categoryRepository.existsByName(anyString())).thenReturn(false);
-    when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
-    when(categoryConverter.entityToDto(any(Category.class))).thenReturn(updatedCategoryDto);
-    when(categoryRepository.save(any(Category.class))).thenReturn(category);
+      // then
+      assertEquals(2, result.size());
+      assertEquals(CATEGORY_NAME, result.get(0).getCategoryName());
+      assertEquals(CATEGORY_NAME, result.get(1).getCategoryName());
+    }
 
-    // when
-    CategoryDto result = categoryService.updateCategory(1L, updatedCategoryDto);
+    @Test
+    @DisplayName("카테고리 수정 테스트")
+    void updateCategory() {
+      // given
+      CategoryDto updatedCategoryDto = new CategoryDto();
+      updatedCategoryDto.setCategoryName(UPDATE_CATEGORY_NAME);
+      when(categoryRepository.existsByName(anyString())).thenReturn(false);
+      when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
+      when(categoryConverter.entityToDto(any(Category.class))).thenReturn(updatedCategoryDto);
+      when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-    // then
-    assertEquals(UPDATE_CATEGORY_NAME, result.getCategoryName());
-  }
+      // when
+      CategoryDto result = categoryService.updateCategory(1L, updatedCategoryDto);
 
-  @Test
-  @DisplayName("카테고리 삭제 테스트")
-  void deleteCategory() {
-    // given
-    when(authentication.getName()).thenReturn(EMAIL);
-    when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
-    when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-    doNothing().when(categoryRepository).delete(any(Category.class));
+      // then
+      assertEquals(UPDATE_CATEGORY_NAME, result.getCategoryName());
+    }
 
-    // when
-    categoryService.deleteCategory(1L, authentication);
+    @Test
+    @DisplayName("카테고리 삭제 테스트")
+    void deleteCategory() {
+      // given
+      when(authentication.getName()).thenReturn(EMAIL);
+      when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
+      when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+      doNothing().when(categoryRepository).delete(any(Category.class));
 
-    // then
-    verify(categoryRepository, times(1)).delete(any(Category.class));
-  }
-
-  @Test
-  @DisplayName("카테고리 생성 실패 테스트 - 이미 삭제된 회원")
-  void createCategory_withDeletedMember() {
-    // given
-    when(authentication.getName()).thenReturn(EMAIL);
-    Member deletedMember = Member.builder().email(EMAIL).isDeleted(true).build();
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(deletedMember));
-
-    // then
-    assertThrows(MemberException.class, () -> {
-      categoryService.createCategory(CATEGORY_NAME, authentication);
-    });
-  }
-
-
-  @Test
-  @DisplayName("카테고리 생성 실패 테스트 - 이미 존재하는 카테고리 이름")
-  void createCategory_withDuplicateName() {
-    // given
-    when(authentication.getName()).thenReturn(EMAIL);
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-    when(categoryRepository.existsByName(anyString())).thenReturn(true);
-
-    // then
-    assertThrows(CategoryException.class, () -> {
-      categoryService.createCategory(CATEGORY_NAME, authentication);
-    });
-  }
-
-
-  @Test
-  @DisplayName("카테고리 수정 실패 테스트 - 이미 존재하는 카테고리 이름")
-  void updateCategory_withDuplicateName() {
-    // given
-    when(categoryRepository.existsByName(anyString())).thenReturn(true);
-
-    // then
-    assertThrows(CategoryException.class, () -> {
-      categoryService.updateCategory(1L, categoryDto);
-    });
-  }
-
-  @Test
-  @DisplayName("카테고리 삭제 실패 테스트 - 삭제 권한 없음")
-  void deleteCategory_noPermission() {
-    // given
-    when(authentication.getName()).thenReturn("differentEmail");
-    when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-
-    // then
-    assertThrows(GlobalException.class, () -> {
+      // when
       categoryService.deleteCategory(1L, authentication);
-    });
+
+      // then
+      verify(categoryRepository, times(1)).delete(any(Category.class));
+    }
   }
 
+  @Nested
+  @DisplayName("카테고리 Service Exception 테스트")
+  class CategoryExceptionTest {
 
+    @Test
+    @DisplayName("카테고리 생성 실패 테스트 - 이미 삭제된 회원")
+    void createCategory_withDeletedMember() {
+      // given
+      when(authentication.getName()).thenReturn(EMAIL);
+      Member deletedMember = Member.builder().email(EMAIL).isDeleted(true).build();
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(deletedMember));
+
+      // then
+      assertThrows(MemberException.class, () -> {
+        categoryService.createCategory(CATEGORY_NAME, authentication);
+      });
+    }
+
+
+    @Test
+    @DisplayName("카테고리 생성 실패 테스트 - 이미 존재하는 카테고리 이름")
+    void createCategory_withDuplicateName() {
+      // given
+      when(authentication.getName()).thenReturn(EMAIL);
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
+      when(categoryRepository.existsByName(anyString())).thenReturn(true);
+
+      // then
+      assertThrows(CategoryException.class, () -> {
+        categoryService.createCategory(CATEGORY_NAME, authentication);
+      });
+    }
+
+
+    @Test
+    @DisplayName("카테고리 수정 실패 테스트 - 이미 존재하는 카테고리 이름")
+    void updateCategory_withDuplicateName() {
+      // given
+      when(categoryRepository.existsByName(anyString())).thenReturn(true);
+
+      // then
+      assertThrows(CategoryException.class, () -> {
+        categoryService.updateCategory(1L, categoryDto);
+      });
+    }
+
+    @Test
+    @DisplayName("카테고리 삭제 실패 테스트 - 삭제 권한 없음")
+    void deleteCategory_noPermission() {
+      // given
+      when(authentication.getName()).thenReturn("differentEmail");
+      when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+
+      // then
+      assertThrows(GlobalException.class, () -> {
+        categoryService.deleteCategory(1L, authentication);
+      });
+    }
+  }
 }

@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,144 +100,152 @@ public class CommentServiceTest {
     when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
   }
 
-  @Test
-  @DisplayName("댓글 생성 테스트")
-  public void writeCommentTest() {
-    // given
-    when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+  @Nested
+  @DisplayName("댓글 Service 테스트")
+  class CommentTest {
 
-    // when
-    CommentDto result = commentService.writeComment(1L, COMMENT_CONTENT, authentication);
+    @Test
+    @DisplayName("댓글 생성 테스트")
+    public void writeCommentTest() {
+      // given
+      when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-    // then
-    assertNotNull(result);
-    assertEquals(COMMENT_CONTENT, result.getComments());
-  }
+      // when
+      CommentDto result = commentService.writeComment(1L, COMMENT_CONTENT, authentication);
 
-  @Test
-  @DisplayName("댓글 수정 테스트")
-  public void updateCommentTest() {
-    // given
-    comment.setComments(UPDATE_COMMENT_COTNET);
+      // then
+      assertNotNull(result);
+      assertEquals(COMMENT_CONTENT, result.getComments());
+    }
 
-    // when
-    CommentDto result = commentService.updateComment(1L, UPDATE_COMMENT_COTNET, authentication);
+    @Test
+    @DisplayName("댓글 수정 테스트")
+    public void updateCommentTest() {
+      // given
+      comment.setComments(UPDATE_COMMENT_COTNET);
 
-    // then
-    assertNotNull(result);
-    assertEquals(UPDATE_COMMENT_COTNET, result.getComments());
-  }
+      // when
+      CommentDto result = commentService.updateComment(1L, UPDATE_COMMENT_COTNET, authentication);
 
-  @Test
-  @DisplayName("댓글 삭제 테스트")
-  public void deleteCommentTest() {
-    // given
-    doNothing().when(commentRepository).delete(any(Comment.class));
+      // then
+      assertNotNull(result);
+      assertEquals(UPDATE_COMMENT_COTNET, result.getComments());
+    }
 
-    // when
-    commentService.deleteComment(1L, authentication);
+    @Test
+    @DisplayName("댓글 삭제 테스트")
+    public void deleteCommentTest() {
+      // given
+      doNothing().when(commentRepository).delete(any(Comment.class));
 
-    // then
-    verify(commentRepository, times(1)).delete(any(Comment.class));
-  }
-
-  @Test
-  @DisplayName("댓글 조회 테스트")
-  public void getCommentsTest() {
-    // given
-    Page<Comment> page = new PageImpl<>(Collections.singletonList(comment));
-    when(commentRepository.findByPost(any(Post.class), any(Pageable.class))).thenReturn(page);
-
-    // when
-    Page<CommentDto> result = commentService.getComments(1L, PageRequest.of(0, 10));
-
-    // then
-    assertEquals(1, result.getContent().size());
-  }
-
-  @Test
-  @DisplayName("회원이 존재하지 않을 때 댓글 작성")
-  public void writeCommentTest_MemberNotFound() {
-    // given
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(MemberException.class, () -> {
-      commentService.writeComment(1L, COMMENT_CONTENT, authentication);
-    });
-  }
-
-  @Test
-  @DisplayName("게시글이 존재하지 않을 때 댓글 작성")
-  public void writeCommentTest_PostNotFound() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(PostException.class, () -> {
-      commentService.writeComment(1L, COMMENT_CONTENT, authentication);
-    });
-  }
-
-  @Test
-  @DisplayName("댓글이 존재하지 않을 때 댓글 수정")
-  public void updateCommentTest_CommentNotFound() {
-    // given
-    when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(CommentException.class, () -> {
-      commentService.updateComment(1L, UPDATE_COMMENT_COTNET, authentication);
-    });
-  }
-
-  @Test
-  @DisplayName("다른 회원의 댓글을 수정하려 할 때")
-  public void updateCommentTest_AccessDenied() {
-    // given
-    when(authentication.getName()).thenReturn("another@test.com");
-
-    // when & then
-    assertThrows(GlobalException.class, () -> {
-      commentService.updateComment(1L, UPDATE_COMMENT_COTNET, authentication);
-    });
-  }
-
-  @Test
-  @DisplayName("댓글이 존재하지 않을 때 댓글 삭제")
-  public void deleteCommentTest_CommentNotFound() {
-    // given
-    when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(CommentException.class, () -> {
+      // when
       commentService.deleteComment(1L, authentication);
-    });
+
+      // then
+      verify(commentRepository, times(1)).delete(any(Comment.class));
+    }
+
+    @Test
+    @DisplayName("댓글 조회 테스트")
+    public void getCommentsTest() {
+      // given
+      Page<Comment> page = new PageImpl<>(Collections.singletonList(comment));
+      when(commentRepository.findByPost(any(Post.class), any(Pageable.class))).thenReturn(page);
+
+      // when
+      Page<CommentDto> result = commentService.getComments(1L, PageRequest.of(0, 10));
+
+      // then
+      assertEquals(1, result.getContent().size());
+    }
   }
 
-  @Test
-  @DisplayName("다른 회원의 댓글을 삭제하려 할 때")
-  public void deleteCommentTest_AccessDenied() {
-    // given
-    when(authentication.getName()).thenReturn("another@test.com");
+  @Nested
+  @DisplayName("댓글 Service Exception 테스트")
+  class CommentExceptionTest {
 
-    // when & then
-    assertThrows(GlobalException.class, () -> {
-      commentService.deleteComment(1L, authentication);
-    });
+    @Test
+    @DisplayName("회원이 존재하지 않을 때 댓글 작성")
+    public void writeCommentTest_MemberNotFound() {
+      // given
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        commentService.writeComment(1L, COMMENT_CONTENT, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("게시글이 존재하지 않을 때 댓글 작성")
+    public void writeCommentTest_PostNotFound() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(PostException.class, () -> {
+        commentService.writeComment(1L, COMMENT_CONTENT, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("댓글이 존재하지 않을 때 댓글 수정")
+    public void updateCommentTest_CommentNotFound() {
+      // given
+      when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(CommentException.class, () -> {
+        commentService.updateComment(1L, UPDATE_COMMENT_COTNET, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("다른 회원의 댓글을 수정하려 할 때")
+    public void updateCommentTest_AccessDenied() {
+      // given
+      when(authentication.getName()).thenReturn("another@test.com");
+
+      // when & then
+      assertThrows(GlobalException.class, () -> {
+        commentService.updateComment(1L, UPDATE_COMMENT_COTNET, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("댓글이 존재하지 않을 때 댓글 삭제")
+    public void deleteCommentTest_CommentNotFound() {
+      // given
+      when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(CommentException.class, () -> {
+        commentService.deleteComment(1L, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("다른 회원의 댓글을 삭제하려 할 때")
+    public void deleteCommentTest_AccessDenied() {
+      // given
+      when(authentication.getName()).thenReturn("another@test.com");
+
+      // when & then
+      assertThrows(GlobalException.class, () -> {
+        commentService.deleteComment(1L, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("게시글이 존재하지 않을 때 댓글 조회")
+    public void getCommentsTest_PostNotFound() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(PostException.class, () -> {
+        commentService.getComments(1L, PageRequest.of(0, 10));
+      });
+    }
   }
-
-  @Test
-  @DisplayName("게시글이 존재하지 않을 때 댓글 조회")
-  public void getCommentsTest_PostNotFound() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(PostException.class, () -> {
-      commentService.getComments(1L, PageRequest.of(0, 10));
-    });
-  }
-
-
 }

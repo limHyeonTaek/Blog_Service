@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -89,182 +90,191 @@ public class PostServiceTest {
     category.setId(1L);
   }
 
-  @Test
-  @DisplayName("게시글 생성 테스트")
-  void createPost() {
-    // given
-    when(authentication.getName()).thenReturn(member.getEmail());
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-    when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
-    when(postRepository.save(any(Post.class))).thenReturn(post);
-    when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+  @Nested
+  @DisplayName("포스트Service 테스트")
+  class PostCRUDTest {
 
-    // when
-    PostDto result = postService.createPost(postDto, authentication);
+    @Test
+    @DisplayName("게시글 생성 테스트")
+    void createPost() {
+      // given
+      when(authentication.getName()).thenReturn(member.getEmail());
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
+      when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
+      when(postRepository.save(any(Post.class))).thenReturn(post);
+      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
 
-    // then
-    assertNotNull(result);
-  }
-
-  @Test
-  @DisplayName("게시글 카테고리와 함께 생성 테스트")
-  void createPostWithCategory() {
-    // given
-    when(authentication.getName()).thenReturn(member.getEmail());
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-    when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
-    when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
-    when(postRepository.save(any(Post.class))).thenReturn(post);
-    when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
-
-    // when
-    PostDto result = postService.createPostWithCategory(postDto, category.getName(),
-        authentication);
-
-    // then
-    assertNotNull(result);
-  }
-
-  @Test
-  @DisplayName("게시글 조회 테스트")
-  void getPostById() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-    when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
-
-    // when
-    PostDto result = postService.getPostById(1L);
-
-    // then
-    assertNotNull(result);
-  }
-
-  @Test
-  @DisplayName("전체 게시글 조회 테스트")
-  void getAllPosts() {
-    // given
-    Page<Post> page = new PageImpl<>(Collections.singletonList(post));
-    when(postRepository.findAllByOrderByCreatedDateDesc(any(Pageable.class))).thenReturn(page);
-    when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
-
-    // when
-    Page<PostDto> result = postService.getAllPosts(PageRequest.of(0, 10));
-
-    // then
-    assertEquals(1, result.getContent().size());
-  }
-
-  @Test
-  @DisplayName("게시글 수정 테스트")
-  void updatePost() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-    when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
-    when(postRepository.save(any(Post.class))).thenReturn(post);
-    when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
-
-    // when
-    PostDto result = postService.updatePost(1L, postDto);
-
-    // then
-    assertNotNull(result);
-  }
-
-  @Test
-  @DisplayName("게시글 삭제 테스트")
-  void deletePost() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-
-    // when
-    postService.deletePost(1L);
-
-    // then
-    verify(postRepository, times(1)).delete(any(Post.class));
-  }
-
-  @Test
-  @DisplayName("게시글 검색 테스트")
-  void searchPosts() {
-    // given
-    Page<Post> page = new PageImpl<>(Collections.singletonList(post));
-    when(postRepository.findByTitleContainingOrContentContaining(anyString(),
-        any(Pageable.class))).thenReturn(page);
-    when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
-
-    // when
-    Page<PostDto> result = postService.searchPosts("test", PageRequest.of(0, 10));
-
-    // then
-    assertEquals(1, result.getContent().size());
-  }
-
-  @Test
-  @DisplayName("게시글 생성 실패 테스트 - 회원 정보 없음")
-  void createPost_memberNotFound() {
-    // given
-    when(authentication.getName()).thenReturn(member.getEmail());
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-
-    // then
-    assertThrows(MemberException.class, () -> {
       // when
-      postService.createPost(postDto, authentication);
-    });
-  }
+      PostDto result = postService.createPost(postDto, authentication);
 
-  @Test
-  @DisplayName("게시글 생성 실패 테스트 - 카테고리 정보 없음")
-  void createPostWithCategory_categoryNotFound() {
-    // given
-    when(authentication.getName()).thenReturn(member.getEmail());
-    when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-    when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+      // then
+      assertNotNull(result);
+    }
 
-    // then
-    assertThrows(CategoryException.class, () -> {
+    @Test
+    @DisplayName("게시글 카테고리와 함께 생성 테스트")
+    void createPostWithCategory() {
+      // given
+      when(authentication.getName()).thenReturn(member.getEmail());
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
+      when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
+      when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
+      when(postRepository.save(any(Post.class))).thenReturn(post);
+      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+
       // when
-      postService.createPostWithCategory(postDto, category.getName(), authentication);
-    });
-  }
+      PostDto result = postService.createPostWithCategory(postDto, category.getName(),
+          authentication);
 
-  @Test
-  @DisplayName("게시글 조회 실패 테스트 - 게시글 정보 없음")
-  void getPostById_postNotFound() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+      // then
+      assertNotNull(result);
+    }
 
-    // then
-    assertThrows(PostException.class, () -> {
+    @Test
+    @DisplayName("게시글 조회 테스트")
+    void getPostById() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+
       // when
-      postService.getPostById(1L);
-    });
-  }
+      PostDto result = postService.getPostById(1L);
 
-  @Test
-  @DisplayName("게시글 수정 실패 테스트 - 게시글 정보 없음")
-  void updatePost_postNotFound() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+      // then
+      assertNotNull(result);
+    }
 
-    // then
-    assertThrows(PostException.class, () -> {
+    @Test
+    @DisplayName("전체 게시글 조회 테스트")
+    void getAllPosts() {
+      // given
+      Page<Post> page = new PageImpl<>(Collections.singletonList(post));
+      when(postRepository.findAllByOrderByCreatedDateDesc(any(Pageable.class))).thenReturn(page);
+      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+
       // when
-      postService.updatePost(1L, postDto);
-    });
-  }
+      Page<PostDto> result = postService.getAllPosts(PageRequest.of(0, 10));
 
-  @Test
-  @DisplayName("게시글 삭제 실패 테스트 - 게시글 정보 없음")
-  void deletePost_postNotFound() {
-    // given
-    when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+      // then
+      assertEquals(1, result.getContent().size());
+    }
 
-    // then
-    assertThrows(PostException.class, () -> {
+    @Test
+    @DisplayName("게시글 수정 테스트")
+    void updatePost() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+      when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
+      when(postRepository.save(any(Post.class))).thenReturn(post);
+      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+
+      // when
+      PostDto result = postService.updatePost(1L, postDto);
+
+      // then
+      assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 테스트")
+    void deletePost() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+
       // when
       postService.deletePost(1L);
-    });
+
+      // then
+      verify(postRepository, times(1)).delete(any(Post.class));
+    }
+
+    @Test
+    @DisplayName("게시글 검색 테스트")
+    void searchPosts() {
+      // given
+      Page<Post> page = new PageImpl<>(Collections.singletonList(post));
+      when(postRepository.findByTitleContainingOrContentContaining(anyString(),
+          any(Pageable.class))).thenReturn(page);
+      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+
+      // when
+      Page<PostDto> result = postService.searchPosts("test", PageRequest.of(0, 10));
+
+      // then
+      assertEquals(1, result.getContent().size());
+    }
   }
 
+  @Nested
+  @DisplayName("포스트 Service Exception 테스트")
+  class PostExceptionTest {
+
+    @Test
+    @DisplayName("게시글 생성 실패 테스트 - 회원 정보 없음")
+    void createPost_memberNotFound() {
+      // given
+      when(authentication.getName()).thenReturn(member.getEmail());
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+      // then
+      assertThrows(MemberException.class, () -> {
+        // when
+        postService.createPost(postDto, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("게시글 생성 실패 테스트 - 카테고리 정보 없음")
+    void createPostWithCategory_categoryNotFound() {
+      // given
+      when(authentication.getName()).thenReturn(member.getEmail());
+      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
+      when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+      // then
+      assertThrows(CategoryException.class, () -> {
+        // when
+        postService.createPostWithCategory(postDto, category.getName(), authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("게시글 조회 실패 테스트 - 게시글 정보 없음")
+    void getPostById_postNotFound() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // then
+      assertThrows(PostException.class, () -> {
+        // when
+        postService.getPostById(1L);
+      });
+    }
+
+    @Test
+    @DisplayName("게시글 수정 실패 테스트 - 게시글 정보 없음")
+    void updatePost_postNotFound() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // then
+      assertThrows(PostException.class, () -> {
+        // when
+        postService.updatePost(1L, postDto);
+      });
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 실패 테스트 - 게시글 정보 없음")
+    void deletePost_postNotFound() {
+      // given
+      when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // then
+      assertThrows(PostException.class, () -> {
+        // when
+        postService.deletePost(1L);
+      });
+    }
+  }
 }

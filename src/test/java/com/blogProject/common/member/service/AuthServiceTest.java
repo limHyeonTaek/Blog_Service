@@ -23,6 +23,7 @@ import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -71,92 +72,103 @@ public class AuthServiceTest {
         .thenReturn(mock(Authentication.class));
   }
 
-  @Test
-  @DisplayName("정상적인 회원가입 테스트")
-  public void testSignup() {
-    // given
-    when(memberRepository.existsByEmail(signup.getEmail())).thenReturn(false);
-    when(memberRepository.existsByName(signup.getName())).thenReturn(false);
-    when(memberRepository.save(any(Member.class))).thenReturn(member);
+  @Nested
+  @DisplayName("Auth Service 테스트")
+  class AuthTest {
 
-    // when
-    MemberDto result = authService.signup(signup);
+    @Test
+    @DisplayName("정상적인 회원가입 테스트")
+    public void testSignup() {
+      // given
+      when(memberRepository.existsByEmail(signup.getEmail())).thenReturn(false);
+      when(memberRepository.existsByName(signup.getName())).thenReturn(false);
+      when(memberRepository.save(any(Member.class))).thenReturn(member);
 
-    // then
-    verify(memberRepository, times(1)).save(any(Member.class));
-    assertEquals(member.getId(), result.getMemberId());
-    assertEquals(member.getName(), result.getName());
-    assertEquals(member.getEmail(), result.getEmail());
-    assertEquals(member.getPhoneNumber(), result.getPhoneNumber());
-    assertEquals(member.getRole(), result.getRole());
+      // when
+      MemberDto result = authService.signup(signup);
+
+      // then
+      verify(memberRepository, times(1)).save(any(Member.class));
+      assertEquals(member.getId(), result.getMemberId());
+      assertEquals(member.getName(), result.getName());
+      assertEquals(member.getEmail(), result.getEmail());
+      assertEquals(member.getPhoneNumber(), result.getPhoneNumber());
+      assertEquals(member.getRole(), result.getRole());
+    }
+
+    @Test
+    @DisplayName("정상적인 로그인 테스트")
+    public void testSignin() {
+      // given
+      when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+          .thenReturn(new TestingAuthenticationToken(memberDto, null));
+
+      // when
+      MemberDto result = authService.signin(signin);
+
+      // then
+      verify(authenticationManager, times(1)).authenticate(
+          any(UsernamePasswordAuthenticationToken.class));
+      assertEquals(memberDto, result);
+    }
   }
 
-  @Test
-  @DisplayName("이메일 중복 발생 테스트")
-  public void testSignup_WithExistingEmail_ShouldThrowException() {
-    // given
-    when(memberRepository.existsByEmail(signup.getEmail())).thenReturn(true);
+  @Nested
+  @DisplayName("Auth Service Exception 테스트")
+  class AuthExceptionTest {
 
-    // when & then
-    assertThrows(MemberException.class, () -> {
-      authService.signup(signup);
-    });
-    verify(memberRepository, never()).save(any(Member.class));
-  }
+    @Test
+    @DisplayName("이메일 중복 발생 테스트")
+    public void testSignup_WithExistingEmail_ShouldThrowException() {
+      // given
+      when(memberRepository.existsByEmail(signup.getEmail())).thenReturn(true);
 
-  @Test
-  @DisplayName("이름 중복 발생 테스트")
-  public void testSignup_WithExistingName_ShouldThrowException() {
-    // given
-    when(memberRepository.existsByName(signup.getName())).thenReturn(true);
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        authService.signup(signup);
+      });
+      verify(memberRepository, never()).save(any(Member.class));
+    }
 
-    // when & then
-    assertThrows(MemberException.class, () -> {
-      authService.signup(signup);
-    });
-    verify(memberRepository, never()).save(any(Member.class));
-  }
+    @Test
+    @DisplayName("이름 중복 발생 테스트")
+    public void testSignup_WithExistingName_ShouldThrowException() {
+      // given
+      when(memberRepository.existsByName(signup.getName())).thenReturn(true);
 
-  @Test
-  @DisplayName("정상적인 로그인 테스트")
-  public void testSignin() {
-    // given
-    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-        .thenReturn(new TestingAuthenticationToken(memberDto, null));
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        authService.signup(signup);
+      });
+      verify(memberRepository, never()).save(any(Member.class));
+    }
 
-    // when
-    MemberDto result = authService.signin(signin);
 
-    // then
-    verify(authenticationManager, times(1)).authenticate(
-        any(UsernamePasswordAuthenticationToken.class));
-    assertEquals(memberDto, result);
-  }
+    @Test
+    @DisplayName("로그인 실패 - UsernameNotFoundException 테스트")
+    public void testSignin_WithInvalidUsername_ShouldThrowException() {
+      // given
+      when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+          .thenThrow(new UsernameNotFoundException("User not found"));
 
-  @Test
-  @DisplayName("로그인 실패 - UsernameNotFoundException 테스트")
-  public void testSignin_WithInvalidUsername_ShouldThrowException() {
-    // given
-    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-        .thenThrow(new UsernameNotFoundException("User not found"));
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        authService.signin(signin);
+      });
+    }
 
-    // when & then
-    assertThrows(MemberException.class, () -> {
-      authService.signin(signin);
-    });
-  }
+    @Test
+    @DisplayName("로그인 실패 - BadCredentialsException 테스트")
+    public void testSignin_WithInvalidPassword_ShouldThrowException() {
+      // given
+      when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+          .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-  @Test
-  @DisplayName("로그인 실패 - BadCredentialsException 테스트")
-  public void testSignin_WithInvalidPassword_ShouldThrowException() {
-    // given
-    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-        .thenThrow(new BadCredentialsException("Invalid credentials"));
-
-    // when & then
-    assertThrows(MemberException.class, () -> {
-      authService.signin(signin);
-    });
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        authService.signin(signin);
+      });
+    }
   }
 }
 

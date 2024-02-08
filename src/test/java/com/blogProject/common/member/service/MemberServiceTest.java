@@ -24,6 +24,7 @@ import com.blogProject.exception.GlobalException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,71 +65,80 @@ public class MemberServiceTest {
     when(authentication.getName()).thenReturn(member.getEmail());
   }
 
-  @Test
-  @DisplayName("회원 정보 수정")
-  public void updateMemberTest() {
-    // given
-    UpdateMember request = new UpdateMember(MEMBER_NAME_UPDATE, PHONE_NUMBER_UPDATE);
+  @Nested
+  @DisplayName("회원 Service 테스트")
+  class MemberTest {
 
-    when(memberRepository.save(any(Member.class))).thenReturn(member);
+    @Test
+    @DisplayName("회원 정보 수정")
+    public void updateMemberTest() {
+      // given
+      UpdateMember request = new UpdateMember(MEMBER_NAME_UPDATE, PHONE_NUMBER_UPDATE);
 
-    // when
-    MemberDto result = memberService.updateMember(1L, request);
+      when(memberRepository.save(any(Member.class))).thenReturn(member);
 
-    // then
-    assertEquals(MEMBER_NAME_UPDATE, result.getName());
-    assertEquals(PHONE_NUMBER_UPDATE, result.getPhoneNumber());
-  }
+      // when
+      MemberDto result = memberService.updateMember(1L, request);
 
-  @Test
-  @DisplayName("회원 계정 삭제")
-  public void deleteMemberTest() {
-    // given
-    doNothing().when(memberRepository).delete(any(Member.class));
+      // then
+      assertEquals(MEMBER_NAME_UPDATE, result.getName());
+      assertEquals(PHONE_NUMBER_UPDATE, result.getPhoneNumber());
+    }
 
-    // when
-    memberService.deleteMember(1L, authentication);
+    @Test
+    @DisplayName("회원 계정 삭제")
+    public void deleteMemberTest() {
+      // given
+      doNothing().when(memberRepository).delete(any(Member.class));
 
-    // then
-    assertTrue(member.isDeleted());
-  }
-
-  @Test
-  @DisplayName("회원 정보 수정 - 회원이 존재하지 않을 때")
-  public void updateMemberTest_MemberNotFound() {
-    // given
-    UpdateMember request = new UpdateMember(MEMBER_NAME_UPDATE, PHONE_NUMBER_UPDATE);
-    when(memberRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(MemberException.class, () -> {
-      memberService.updateMember(1L, request);
-    });
-  }
-
-  @Test
-  @DisplayName("회원 계정 삭제 - 회원이 존재하지 않을 때")
-  public void deleteMemberTest_MemberNotFound() {
-    // given
-    when(memberRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when & then
-    assertThrows(MemberException.class, () -> {
+      // when
       memberService.deleteMember(1L, authentication);
-    });
+
+      // then
+      assertTrue(member.isDeleted());
+    }
   }
 
-  @Test
-  @DisplayName("회원 계정 삭제 - 다른 회원의 계정을 삭제하려 할 때")
-  public void deleteMemberTest_AccessDenied() {
-    // given
-    when(authentication.getName()).thenReturn("another@test.com");
+  @Nested
+  @DisplayName("회원 Service Exception 테스트")
+  class MemberExceptionTest {
 
-    // when & then
-    assertThrows(GlobalException.class, () -> {
-      memberService.deleteMember(1L, authentication);
-    });
+    @Test
+    @DisplayName("회원 정보 수정 - 회원이 존재하지 않을 때")
+    public void updateMemberTest_MemberNotFound() {
+      // given
+      UpdateMember request = new UpdateMember(MEMBER_NAME_UPDATE, PHONE_NUMBER_UPDATE);
+      when(memberRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        memberService.updateMember(1L, request);
+      });
+    }
+
+    @Test
+    @DisplayName("회원 계정 삭제 - 회원이 존재하지 않을 때")
+    public void deleteMemberTest_MemberNotFound() {
+      // given
+      when(memberRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+      // when & then
+      assertThrows(MemberException.class, () -> {
+        memberService.deleteMember(1L, authentication);
+      });
+    }
+
+    @Test
+    @DisplayName("회원 계정 삭제 - 다른 회원의 계정을 삭제하려 할 때")
+    public void deleteMemberTest_AccessDenied() {
+      // given
+      when(authentication.getName()).thenReturn("another@test.com");
+
+      // when & then
+      assertThrows(GlobalException.class, () -> {
+        memberService.deleteMember(1L, authentication);
+      });
+    }
   }
-
 }
 
