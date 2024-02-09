@@ -14,8 +14,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,8 +36,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -53,6 +54,7 @@ public class PostControllerTest {
   @MockBean
   private PostService postService;
   private PostDto postDto;
+  private MockMultipartFile file;
 
   @BeforeEach
   void setUp() {
@@ -63,6 +65,9 @@ public class PostControllerTest {
         .categoryName(null)
         .memberName(EMAIL)
         .build();
+
+    file = new MockMultipartFile("file", "originalFileName.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "filedata".getBytes());
   }
 
   @Nested
@@ -71,35 +76,43 @@ public class PostControllerTest {
 
     @Test
     @DisplayName("게시글 생성 테스트")
-    @WithMockUser(username = EMAIL, roles = "USER")
+    @WithMockUser(username = EMAIL, roles = "ADMIN")
     void createPostTest() throws Exception {
       // given
-      when(postService.createPost(any(), any())).thenReturn(postDto);
+      when(postService.createPost(any(), any(), any(), any())).thenReturn(postDto);
 
       // when & then
-      mockMvc.perform(post("/api/post")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+      mockMvc.perform(multipart("/api/post")
+              .file(file)
+              .param("title", postDto.getTitle())
+              .param("contents", postDto.getContents()))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.title", is(postDto.getTitle())))
           .andExpect(jsonPath("$.contents", is(postDto.getContents())));
     }
 
+
     @Test
     @DisplayName("게시글 수정 테스트")
-    @WithMockUser(username = EMAIL, roles = "USER")
+    @WithMockUser(username = EMAIL, roles = "ADMIN")
     void updatePostTest() throws Exception {
       // given
-      when(postService.updatePost(anyLong(), any())).thenReturn(postDto);
+      when(postService.updatePost(anyLong(), any(), any())).thenReturn(postDto);
 
       // when & then
-      mockMvc.perform(patch("/api/post/" + postDto.getPostId())
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+      mockMvc.perform(MockMvcRequestBuilders.multipart("/api/post/" + postDto.getPostId())
+              .file(file)
+              .param("title", postDto.getTitle())
+              .param("contents", postDto.getContents())
+              .with(request -> {
+                request.setMethod("PATCH");
+                return request;
+              }))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.title", is(postDto.getTitle())))
           .andExpect(jsonPath("$.contents", is(postDto.getContents())));
     }
+
 
     @Test
     @DisplayName("게시글 삭제 테스트")
@@ -181,28 +194,37 @@ public class PostControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void createPostFailTest() throws Exception {
       // given
-      when(postService.createPost(any(), any())).thenThrow(new MemberException(MEMBER_WITHDRAWAL));
+      when(postService.createPost(any(), any(), any(), any())).thenThrow(
+          new MemberException(MEMBER_WITHDRAWAL));
 
       // when & then
-      mockMvc.perform(post("/api/post")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+      mockMvc.perform(multipart("/api/post")
+              .file(file)
+              .param("title", postDto.getTitle())
+              .param("contents", postDto.getContents()))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errorCode").value(MEMBER_WITHDRAWAL.toString()))
           .andExpect(jsonPath("$.message").value(MEMBER_WITHDRAWAL.getMessage()));
     }
+
 
     @Test
     @DisplayName("게시글 수정 실패 테스트")
     @WithMockUser(username = EMAIL, roles = "USER")
     void updatePostFailTest() throws Exception {
       // given
-      when(postService.updatePost(anyLong(), any())).thenThrow(new PostException(POST_NOT_FOUND));
+      when(postService.updatePost(anyLong(), any(), any())).thenThrow(
+          new PostException(POST_NOT_FOUND));
 
       // when & then
-      mockMvc.perform(patch("/api/post/" + postDto.getPostId())
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+      mockMvc.perform(MockMvcRequestBuilders.multipart("/api/post/" + postDto.getPostId())
+              .file(file)
+              .param("title", postDto.getTitle())
+              .param("contents", postDto.getContents())
+              .with(request -> {
+                request.setMethod("PATCH");
+                return request;
+              }))
           .andExpect(status().isNotFound())
           .andExpect(jsonPath("$.errorCode").value(POST_NOT_FOUND.toString()))
           .andExpect(jsonPath("$.message").value(POST_NOT_FOUND.getMessage()));

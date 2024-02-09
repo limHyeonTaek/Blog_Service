@@ -2,6 +2,8 @@ package com.blogProject.common.post.service;
 
 import static com.blogProject.constant.CategoryConstants.CATEGORY_NAME;
 import static com.blogProject.constant.MemberConstants.EMAIL;
+import static com.blogProject.constant.PostConstants.IMAGE_URL;
+import static com.blogProject.constant.PostConstants.NOT_EXIST_CATEGORY;
 import static com.blogProject.constant.PostConstants.POST_CONTENT;
 import static com.blogProject.constant.PostConstants.POST_TITLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +29,8 @@ import com.blogProject.common.post.dto.model.PostDto;
 import com.blogProject.common.post.entity.Post;
 import com.blogProject.common.post.exception.PostException;
 import com.blogProject.common.post.repository.PostRepository;
+import com.blogProject.common.post.s3Uploader.S3Uploader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +45,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -57,6 +65,10 @@ public class PostServiceTest {
   @Mock
   private MemberRepository memberRepository;
 
+  @Mock
+  private S3Uploader s3Uploader;
+
+
   @InjectMocks
   private PostService postService;
 
@@ -65,6 +77,8 @@ public class PostServiceTest {
   private Member member;
   private Authentication authentication;
   private Category category;
+  private MultipartFile file;
+
 
   @BeforeEach
   public void setUp() {
@@ -72,17 +86,23 @@ public class PostServiceTest {
         .id(1L)
         .title(POST_TITLE)
         .contents(POST_CONTENT)
+        .imageUrl(IMAGE_URL)
         .build();
 
     postDto = PostDto.builder()
         .title(POST_TITLE)
         .contents(POST_CONTENT)
         .categoryName(CATEGORY_NAME)
+        .imageUrl(IMAGE_URL)
         .build();
 
     member = Member.builder()
         .email(EMAIL)
         .build();
+
+    file = new MockMultipartFile("file", "originalFileName.jpg",
+        MediaType.IMAGE_JPEG_VALUE, "filedata".getBytes());
+
     authentication = mock(Authentication.class);
 
     category = new Category();
@@ -94,41 +114,26 @@ public class PostServiceTest {
   @DisplayName("포스트Service 테스트")
   class PostCRUDTest {
 
+
     @Test
     @DisplayName("게시글 생성 테스트")
-    void createPost() {
+    void createPost() throws IOException {
       // given
       when(authentication.getName()).thenReturn(member.getEmail());
       when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
       when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
       when(postRepository.save(any(Post.class))).thenReturn(post);
       when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
+      when(s3Uploader.upload(any(MultipartFile.class), anyString())).thenReturn("mockImageUrl");
 
       // when
-      PostDto result = postService.createPost(postDto, authentication);
+      PostDto result = postService.createPost(postDto, authentication, Optional.ofNullable(file),
+          Optional.empty());
 
       // then
       assertNotNull(result);
     }
 
-    @Test
-    @DisplayName("게시글 카테고리와 함께 생성 테스트")
-    void createPostWithCategory() {
-      // given
-      when(authentication.getName()).thenReturn(member.getEmail());
-      when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-      when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
-      when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
-      when(postRepository.save(any(Post.class))).thenReturn(post);
-      when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
-
-      // when
-      PostDto result = postService.createPostWithCategory(postDto, category.getName(),
-          authentication);
-
-      // then
-      assertNotNull(result);
-    }
 
     @Test
     @DisplayName("게시글 조회 테스트")
@@ -161,7 +166,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("게시글 수정 테스트")
-    void updatePost() {
+    void updatePost() throws IOException {
       // given
       when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
       when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
@@ -169,7 +174,7 @@ public class PostServiceTest {
       when(postConverter.entityToDto(any(Post.class))).thenReturn(postDto);
 
       // when
-      PostDto result = postService.updatePost(1L, postDto);
+      PostDto result = postService.updatePost(1L, postDto, file);
 
       // then
       assertNotNull(result);
@@ -181,12 +186,19 @@ public class PostServiceTest {
       // given
       when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
 
+      when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+      doNothing().when(s3Uploader).deleteFileFromS3(anyString());
+      doNothing().when(postRepository).delete(any(Post.class));
+
       // when
       postService.deletePost(1L);
 
       // then
+      verify(postRepository, times(1)).findById(anyLong());
+      verify(s3Uploader, times(1)).deleteFileFromS3(anyString());
       verify(postRepository, times(1)).delete(any(Post.class));
     }
+
 
     @Test
     @DisplayName("게시글 검색 테스트")
@@ -219,24 +231,29 @@ public class PostServiceTest {
       // then
       assertThrows(MemberException.class, () -> {
         // when
-        postService.createPost(postDto, authentication);
+        postService.createPost(postDto, authentication, Optional.ofNullable(file),
+            Optional.empty());
       });
     }
 
+
     @Test
-    @DisplayName("게시글 생성 실패 테스트 - 카테고리 정보 없음")
+    @DisplayName("게시글 생성 실패 테스트 - 존재하지 않는 카테고리 이름")
     void createPostWithCategory_categoryNotFound() {
       // given
       when(authentication.getName()).thenReturn(member.getEmail());
       when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(member));
-      when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+      when(categoryRepository.findByName(NOT_EXIST_CATEGORY)).thenReturn(Optional.empty());
+      when(postConverter.dtoToEntity(any(PostDto.class), any(Member.class))).thenReturn(post);
 
       // then
       assertThrows(CategoryException.class, () -> {
         // when
-        postService.createPostWithCategory(postDto, category.getName(), authentication);
+        postService.createPost(postDto, authentication, Optional.ofNullable(file),
+            Optional.of(NOT_EXIST_CATEGORY));
       });
     }
+
 
     @Test
     @DisplayName("게시글 조회 실패 테스트 - 게시글 정보 없음")
@@ -260,7 +277,7 @@ public class PostServiceTest {
       // then
       assertThrows(PostException.class, () -> {
         // when
-        postService.updatePost(1L, postDto);
+        postService.updatePost(1L, postDto, file);
       });
     }
 

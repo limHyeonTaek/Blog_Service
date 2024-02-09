@@ -1,34 +1,50 @@
 ### create post
-POST {{host}}/api/post
-Content-Type: application/json
+POST {{host}}/api/post/
+Authorization: Bearer {{$auth.token()}}
+Content-Type: multipart/form-data; boundary=PersonalBlogProject_7MA4YWxkTrZu0gW
+
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="title"
+
+post
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="contents"
+
+contents
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryName"
+
+category
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="file.jpg"
+
+(file data)
+--PersonalBlogProject_7MA4YWxkTrZu0gW--
+
+### update post
+PATCH {{host}}/api/post/{{id}}
+Content-Type: multipart/form-data; boundary=PersonalBlogProject_7MA4YWxkTrZu0gW
 Authorization: Bearer {{$auth.token()}}
 
-{
-  "title": "post",
-  "contents": "contents",
-  "categoryName": null
-}
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="title"
+
+updated title
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="contents"
+
+updated contents
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="updated_file.jpg"
+
+(file data)
+--PersonalBlogProject_7MA4YWxkTrZu0gW--
+
+### search post
+GET {{host}}/api/post/get/search?keyword={{keyword}}&page=0&size=1
 
 ### 전체 post 조회(최신순)
 GET {{host}}/api/post/get?page=0&size=1
 
 ### post 조회
 GET {{host}}/api/post/get/{{id}}
-
-### post update
-PATCH {{host}}/api/post/{{id}}
-Content-Type: application/json
-Authorization: Bearer {{$auth.token()}}
-
-{
-  "title": "updateTitile",
-  "contents": "updateContents"
-}
-
-### delete post
-DELETE {{host}}/api/post/{{id}}
-Authorization: Bearer {{$auth.token()}}
-
-### search post
-GET {{host}}/api/post/get/search?keyword={{keyword}}&page=0&size=1
-
