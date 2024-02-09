@@ -27,6 +27,8 @@ public class PostDto {
 
   private String memberName;
 
+  private String imageUrl;
+
   private LocalDateTime createdDate;
 
   private LocalDateTime updatedDate;

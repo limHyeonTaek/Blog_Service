@@ -27,6 +27,7 @@ public class PostConverter {
     postDto.setCreatedDate(post.getCreatedDate());
     postDto.setUpdatedDate(post.getUpdatedDate());
     postDto.setMemberName(post.getMember().getEmail());
+    postDto.setImageUrl(post.getImageUrl());
     if (post.getCategory() != null) {
       postDto.setCategoryName(post.getCategory().getName());
     }

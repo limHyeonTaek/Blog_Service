@@ -32,8 +32,11 @@ public enum ErrorCode {
 
   // global
   ACCESS_DENIED(FORBIDDEN, "권한이 없습니다."),
-  ACCESS_DENIED_EXCEPTION(FORBIDDEN, "금지된 접근입니다.");
+  ACCESS_DENIED_EXCEPTION(FORBIDDEN, "금지된 접근입니다."),
 
+  // S3
+  S3_FILE_CONVERT_ERROR(BAD_REQUEST, "파일 변환이 실패하였습니다."),
+  S3_FILE_DELETE_ERROR(BAD_REQUEST, "파일 삭제가 실패하였습니다.");
 
   private final HttpStatus status;
   private final String message;

@@ -4,6 +4,7 @@ import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.comment.exception.CommentException;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.post.exception.PostException;
+import com.blogProject.common.post.exception.S3Exception;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,6 +34,11 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(GlobalException.class)
   public ResponseEntity<?> handleGlobalException(GlobalException e) {
+    return toResponse(e.getErrorCode(), e.getMessage());
+  }
+
+  @ExceptionHandler(S3Exception.class)
+  public ResponseEntity<?> handleS3Exception(S3Exception e) {
     return toResponse(e.getErrorCode(), e.getMessage());
   }
 
