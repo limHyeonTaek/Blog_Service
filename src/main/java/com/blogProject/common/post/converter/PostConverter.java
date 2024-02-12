@@ -7,6 +7,7 @@ import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.category.repository.CategoryRepository;
 import com.blogProject.common.member.entity.Member;
 import com.blogProject.common.post.dto.model.PostDto;
+import com.blogProject.common.post.dto.model.WritePost;
 import com.blogProject.common.post.entity.Post;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,11 +23,13 @@ public class PostConverter {
 
   public PostDto entityToDto(Post post) {
     PostDto postDto = new PostDto();
+    postDto.setPostId(post.getId());
     postDto.setTitle(post.getTitle());
     postDto.setContents(post.getContents());
     postDto.setCreatedDate(post.getCreatedDate());
     postDto.setUpdatedDate(post.getUpdatedDate());
     postDto.setMemberName(post.getMember().getEmail());
+    postDto.setImageUrl(post.getImageUrl());
     if (post.getCategory() != null) {
       postDto.setCategoryName(post.getCategory().getName());
     }
@@ -45,6 +48,21 @@ public class PostConverter {
 
     if (postDto.getCategoryName() != null) {
       Category category = categoryRepository.findByName(postDto.getCategoryName())
+          .orElseThrow(() -> new CategoryException(CATEGORY_NOT_FOUND));
+      post.setCategory(category);
+    }
+
+    return post;
+  }
+
+  public Post dtoToEntity(WritePost request, Member member) {
+    Post post = new Post();
+    post.setTitle(request.getTitle());
+    post.setContents(request.getContents());
+    post.setMember(member);
+
+    if (request.getCategoryName() != null) {
+      Category category = categoryRepository.findByName(request.getCategoryName())
           .orElseThrow(() -> new CategoryException(CATEGORY_NOT_FOUND));
       post.setCategory(category);
     }

@@ -10,5 +10,11 @@ public class PostConstants {
 
   public static final String UPDATE_POST_CONTENT = "updateContent";
 
+  public static final String IMAGE_URL = "https://example.com/test.jpg";
+
+  public static final String NOT_EXIST_CATEGORY = "notExistCategory";
+
+  public static final Long NOT_EXIST_IMAGE_ID = 1L;
+
 
 }

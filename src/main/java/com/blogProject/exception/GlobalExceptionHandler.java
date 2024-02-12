@@ -2,6 +2,8 @@ package com.blogProject.exception;
 
 import com.blogProject.common.category.exception.CategoryException;
 import com.blogProject.common.comment.exception.CommentException;
+import com.blogProject.common.image.exception.ImageException;
+import com.blogProject.common.image.exception.S3Exception;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.post.exception.PostException;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,16 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(GlobalException.class)
   public ResponseEntity<?> handleGlobalException(GlobalException e) {
+    return toResponse(e.getErrorCode(), e.getMessage());
+  }
+
+  @ExceptionHandler(S3Exception.class)
+  public ResponseEntity<?> handleS3Exception(S3Exception e) {
+    return toResponse(e.getErrorCode(), e.getMessage());
+  }
+
+  @ExceptionHandler(ImageException.class)
+  public ResponseEntity<?> handleImageException(ImageException e) {
     return toResponse(e.getErrorCode(), e.getMessage());
   }
 

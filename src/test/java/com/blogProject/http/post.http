@@ -4,31 +4,39 @@ Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 
 {
-  "title": "post",
+  "title": "title",
   "contents": "contents",
-  "categoryName": null
+  "categoryName": null,
+  "imageId": null
 }
 
-### 전체 post 조회(최신순)
-GET {{host}}/api/post/get?page=0&size=1
-
-### post 조회
-GET {{host}}/api/post/get/{{id}}
-
-### post update
+### update post
 PATCH {{host}}/api/post/{{id}}
 Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 
 {
-  "title": "updateTitile",
-  "contents": "updateContents"
+  "title": "updateTitle",
+  "contents": "updateContents",
+  "categoryName": null,
+  "imageId": null
 }
 
-### delete post
-DELETE {{host}}/api/post/{{id}}
+### search post
+GET {{host}}/api/post/get/search?keyword={{keyword}}&page=0&size=10
+
+### 전체 post 조회(최신순)
+GET {{host}}/api/post/get?page=0&size=10
+
+### post 조회
+GET {{host}}/api/post/get/{{id}}
+
+### 이미지 업로드
+POST {{host}}/api/post/uploadImage
+Content-Type: multipart/form-data; boundary=PersonalBlogProject_7MA4YWxkTrZu0gW
 Authorization: Bearer {{$auth.token()}}
 
-### search post
-GET {{host}}/api/post/get/search?keyword={{keyword}}&page=0&size=1
+--PersonalBlogProject_7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="{{파일 경로}}"
 
+--PersonalBlogProject_7MA4YWxkTrZu0gW--

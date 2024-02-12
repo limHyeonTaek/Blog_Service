@@ -1,6 +1,8 @@
 package com.blogProject.config;
 
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import com.blogProject.config.jwt.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +31,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
-        .cors(AbstractHttpConfigurer::disable)
+        .cors(withDefaults())
         .httpBasic(AbstractHttpConfigurer::disable)
         .headers(c -> c.frameOptions(
             HeadersConfigurer.FrameOptionsConfig::disable).disable())

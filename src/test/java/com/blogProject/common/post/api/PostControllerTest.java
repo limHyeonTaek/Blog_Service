@@ -1,8 +1,13 @@
 package com.blogProject.common.post.api;
 
 import static com.blogProject.constant.MemberConstants.EMAIL;
+import static com.blogProject.constant.PostConstants.IMAGE_URL;
+import static com.blogProject.constant.PostConstants.NOT_EXIST_CATEGORY;
+import static com.blogProject.constant.PostConstants.NOT_EXIST_IMAGE_ID;
 import static com.blogProject.constant.PostConstants.POST_CONTENT;
 import static com.blogProject.constant.PostConstants.POST_TITLE;
+import static com.blogProject.exception.ErrorCode.CATEGORY_NOT_FOUND;
+import static com.blogProject.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.blogProject.exception.ErrorCode.MEMBER_WITHDRAWAL;
 import static com.blogProject.exception.ErrorCode.POST_NOT_FOUND;
 import static org.hamcrest.Matchers.is;
@@ -14,13 +19,21 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.blogProject.common.category.exception.CategoryException;
+import com.blogProject.common.category.repository.CategoryRepository;
+import com.blogProject.common.image.exception.ImageException;
+import com.blogProject.common.image.repository.ImageRepository;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.post.dto.model.PostDto;
+import com.blogProject.common.post.dto.model.WritePost;
+import com.blogProject.common.post.entity.Post;
 import com.blogProject.common.post.exception.PostException;
 import com.blogProject.common.post.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +51,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,10 +68,25 @@ public class PostControllerTest {
 
   @MockBean
   private PostService postService;
+
+  @Mock
+  private CategoryRepository categoryRepository;
+
+  @Mock
+  private ImageRepository imageRepository;
+
   private PostDto postDto;
+  private WritePost request;
+  private Post post;
 
   @BeforeEach
   void setUp() {
+
+    request = WritePost.builder()
+        .title(POST_TITLE)
+        .contents(POST_CONTENT)
+        .build();
+
     postDto = PostDto.builder()
         .PostId(1L)
         .title(POST_TITLE)
@@ -63,6 +94,14 @@ public class PostControllerTest {
         .categoryName(null)
         .memberName(EMAIL)
         .build();
+
+    post = Post.builder()
+        .id(1L)
+        .title(POST_TITLE)
+        .contents(POST_CONTENT)
+        .imageUrl(IMAGE_URL)
+        .build();
+
   }
 
   @Nested
@@ -70,36 +109,38 @@ public class PostControllerTest {
   class PostTest {
 
     @Test
-    @DisplayName("게시글 생성 테스트")
+    @DisplayName("게시글 생성 성공")
     @WithMockUser(username = EMAIL, roles = "USER")
     void createPostTest() throws Exception {
       // given
-      when(postService.createPost(any(), any())).thenReturn(postDto);
+      when(postService.createPost(any(WritePost.class), any())).thenReturn(postDto);
 
       // when & then
       mockMvc.perform(post("/api/post")
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+              .content(objectMapper.writeValueAsString(request)))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.title", is(postDto.getTitle())))
           .andExpect(jsonPath("$.contents", is(postDto.getContents())));
     }
 
+
     @Test
-    @DisplayName("게시글 수정 테스트")
+    @DisplayName("게시글 수정 성공")
     @WithMockUser(username = EMAIL, roles = "USER")
     void updatePostTest() throws Exception {
       // given
-      when(postService.updatePost(anyLong(), any())).thenReturn(postDto);
+      when(postService.updatePost(anyLong(), any(WritePost.class))).thenReturn(postDto);
 
       // when & then
-      mockMvc.perform(patch("/api/post/" + postDto.getPostId())
+      mockMvc.perform(patch("/api/post/" + 1L)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+              .content(objectMapper.writeValueAsString(request)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.title", is(postDto.getTitle())))
           .andExpect(jsonPath("$.contents", is(postDto.getContents())));
     }
+
 
     @Test
     @DisplayName("게시글 삭제 테스트")
@@ -169,6 +210,22 @@ public class PostControllerTest {
           .andExpect(jsonPath("$.content[0].title", is(postDto.getTitle())))
           .andExpect(jsonPath("$.content[0].contents", is(postDto.getContents())));
     }
+
+    @Test
+    @DisplayName("이미지 업로드 성공")
+    @WithMockUser(username = EMAIL, roles = "USER")
+    void uploadImageTest() throws Exception {
+      // given
+      MockMultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg",
+          "test image content".getBytes());
+
+      // when & then
+      mockMvc.perform(multipart("/api/post/uploadImage")
+              .file(file)
+              .contentType(MediaType.MULTIPART_FORM_DATA))
+          .andExpect(status().isOk())
+          .andExpect(content().string("이미지가 업로드 되었습니다."));
+    }
   }
 
 
@@ -181,28 +238,31 @@ public class PostControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void createPostFailTest() throws Exception {
       // given
-      when(postService.createPost(any(), any())).thenThrow(new MemberException(MEMBER_WITHDRAWAL));
+      doThrow(new MemberException(MEMBER_WITHDRAWAL))
+          .when(postService).createPost(any(WritePost.class), any(Authentication.class));
 
       // when & then
       mockMvc.perform(post("/api/post")
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+              .content(objectMapper.writeValueAsString(request)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errorCode").value(MEMBER_WITHDRAWAL.toString()))
           .andExpect(jsonPath("$.message").value(MEMBER_WITHDRAWAL.getMessage()));
     }
+
 
     @Test
     @DisplayName("게시글 수정 실패 테스트")
     @WithMockUser(username = EMAIL, roles = "USER")
     void updatePostFailTest() throws Exception {
       // given
-      when(postService.updatePost(anyLong(), any())).thenThrow(new PostException(POST_NOT_FOUND));
+      doThrow(new PostException(POST_NOT_FOUND))
+          .when(postService).updatePost(anyLong(), any(WritePost.class));
 
       // when & then
-      mockMvc.perform(patch("/api/post/" + postDto.getPostId())
+      mockMvc.perform(patch("/api/post/" + 1L)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(postDto)))
+              .content(objectMapper.writeValueAsString(request)))
           .andExpect(status().isNotFound())
           .andExpect(jsonPath("$.errorCode").value(POST_NOT_FOUND.toString()))
           .andExpect(jsonPath("$.message").value(POST_NOT_FOUND.getMessage()));
@@ -236,6 +296,39 @@ public class PostControllerTest {
           .andExpect(jsonPath("$.errorCode").value(POST_NOT_FOUND.toString()))
           .andExpect(jsonPath("$.message").value(POST_NOT_FOUND.getMessage()));
     }
-  }
 
+    @Test
+    @DisplayName("카테고리가 존재하지 않을 때 게시글 생성 실패 테스트")
+    @WithMockUser(username = EMAIL, roles = "USER")
+    void createPostFailWhenCategoryNotFound() throws Exception {
+      // Given
+      request.setCategoryName(NOT_EXIST_CATEGORY);
+      when(categoryRepository.findByName(NOT_EXIST_CATEGORY)).thenThrow(
+          new CategoryException(CATEGORY_NOT_FOUND));
+
+      // When & Then
+      mockMvc.perform(post("/api/posts")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request)))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("이미지 ID가 존재하지 않을 때 게시글 생성 실패 테스트")
+    @WithMockUser(username = EMAIL, roles = "USER")
+    void createPostFailWhenImageNotFound() throws Exception {
+      // Given
+      request.setImageId(NOT_EXIST_IMAGE_ID);
+      when(imageRepository.findById(NOT_EXIST_IMAGE_ID)).thenThrow(
+          new ImageException(IMAGE_NOT_FOUND));
+
+      // When & Then
+      mockMvc.perform(post("/api/posts")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request)))
+          .andExpect(status().isNotFound());
+    }
+
+
+  }
 }

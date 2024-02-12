@@ -21,3 +21,12 @@ spring:
 
   jwt:
     key: cGVyc29uYWwtcHJvamVjdC1ibG9nLXplcm9iYXNlLXBlcnNvbmFsUHJvamVjdAo=
+cloud:
+  aws:
+    s3:
+
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: AKIA3FLDXMDQUSL3I54V
+      secretKey: 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

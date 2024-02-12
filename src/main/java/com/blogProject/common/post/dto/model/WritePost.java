@@ -1,6 +1,5 @@
 package com.blogProject.common.post.dto.model;
 
-import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,9 +12,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDto {
-
-  private Long PostId;
+public class WritePost {
 
   @NotNull(message = "제목을 입력해 주세요.")
   private String title;
@@ -25,12 +22,6 @@ public class PostDto {
 
   private String categoryName;
 
-  private String memberName;
-
-  private String imageUrl;
-
-  private LocalDateTime createdDate;
-
-  private LocalDateTime updatedDate;
+  private Long imageId;
 
 }
