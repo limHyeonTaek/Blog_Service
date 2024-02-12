@@ -1,4 +1,4 @@
-package com.blogProject.common.post.s3Uploader;
+package com.blogProject.common.image.s3Uploader;
 
 import static com.blogProject.exception.ErrorCode.S3_FILE_CONVERT_ERROR;
 import static com.blogProject.exception.ErrorCode.S3_FILE_DELETE_ERROR;
@@ -6,7 +6,7 @@ import static com.blogProject.exception.ErrorCode.S3_FILE_DELETE_ERROR;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.blogProject.common.post.exception.S3Exception;
+import com.blogProject.common.image.exception.S3Exception;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

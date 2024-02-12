@@ -1,4 +1,4 @@
-package com.blogProject.common.post.exception;
+package com.blogProject.common.image.exception;
 
 import com.blogProject.exception.CustomException;
 import com.blogProject.exception.ErrorCode;

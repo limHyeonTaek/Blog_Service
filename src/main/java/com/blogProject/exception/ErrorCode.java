@@ -36,7 +36,11 @@ public enum ErrorCode {
 
   // S3
   S3_FILE_CONVERT_ERROR(BAD_REQUEST, "파일 변환이 실패하였습니다."),
-  S3_FILE_DELETE_ERROR(BAD_REQUEST, "파일 삭제가 실패하였습니다.");
+  S3_FILE_DELETE_ERROR(BAD_REQUEST, "파일 삭제가 실패하였습니다."),
+
+  //image
+  IMAGE_NOT_FOUND(NOT_FOUND, "이미지를 찾을 수 없습니다."),
+  ;
 
   private final HttpStatus status;
   private final String message;

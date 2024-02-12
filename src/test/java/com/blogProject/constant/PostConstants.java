@@ -14,5 +14,7 @@ public class PostConstants {
 
   public static final String NOT_EXIST_CATEGORY = "notExistCategory";
 
+  public static final Long NOT_EXIST_IMAGE_ID = 1L;
+
 
 }
