@@ -32,7 +32,8 @@ public class AuthService {
   @Transactional
   public MemberDto signup(Signup request) {
     if (memberRepository.existsByEmail(request.getEmail()) ||
-        memberRepository.existsByName(request.getName())) {
+        memberRepository.existsByName(request.getName()) ||
+        memberRepository.existsByPhoneNumber(request.getPhoneNumber())) {
       throw new MemberException(MEMBER_ALREADY_EXISTS);
     }
 
