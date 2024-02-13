@@ -64,10 +64,10 @@ public class CommentService {
 
   // 댓글 조회(대댓글 포함)
   @Transactional
-  public Page<CommentDto> getComments(Long postId, Pageable pageable) {
+  public Page<ReplyDto> getComments(Long postId, Pageable pageable) {
     Post post = getPostById(postId);
     Page<Comment> comments = commentRepository.findByPost(post, pageable);
-    return comments.map(CommentDto::fromEntity);
+    return comments.map(ReplyDto::fromEntity);
   }
 
   // 대댓글 생성

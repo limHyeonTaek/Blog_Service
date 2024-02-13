@@ -1,7 +1,7 @@
 package com.blogProject.common.comment.api;
 
 import com.blogProject.common.comment.dto.WriteReply;
-import com.blogProject.common.comment.dto.model.CommentDto;
+import com.blogProject.common.comment.dto.model.ReplyDto;
 import com.blogProject.common.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -48,7 +48,7 @@ public class CommentController {
   @GetMapping("/{postId}")
   public ResponseEntity<?> getComments(@PathVariable Long postId,
       Pageable pageable) {
-    Page<CommentDto> commentDtos = commentService.getComments(postId, pageable);
+    Page<ReplyDto> commentDtos = commentService.getComments(postId, pageable);
     return ResponseEntity.ok(commentDtos);
   }
 
