@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.blogProject.common.comment.dto.model.CommentDto;
+import com.blogProject.common.comment.dto.model.ReplyDto;
 import com.blogProject.common.comment.service.CommentService;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.post.exception.PostException;
@@ -52,12 +53,21 @@ public class CommentControllerTest {
   private CommentService commentService;
 
   private CommentDto commentDto;
+  private ReplyDto replyDto;
 
-  private static final Long COMMENT_ID = 1L;
+  private static final Long COMMENT_ID = 2L;
   private static final Long POST_ID = 1L;
 
   @BeforeEach
   void setUp() {
+    replyDto = ReplyDto.builder()
+        .commentId(COMMENT_ID)
+        .postId(POST_ID)
+        .member(EMAIL)
+        .comments(COMMENT_CONTENT)
+        .parentId(1L)
+        .build();
+
     commentDto = CommentDto.builder()
         .commentId(COMMENT_ID)
         .postId(POST_ID)
@@ -123,7 +133,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void getCommentsTest() throws Exception {
       // given
-      Page<CommentDto> commentDtoPage = new PageImpl<>(List.of(commentDto));
+      Page<ReplyDto> commentDtoPage = new PageImpl<>(List.of(replyDto));
       when(commentService.getComments(anyLong(), any())).thenReturn(commentDtoPage);
 
       // when & then

@@ -1,9 +1,11 @@
 package com.blogProject.common.comment.service;
 
 import static com.blogProject.common.member.entity.Role.ADMIN;
+import static com.blogProject.common.member.entity.Role.USER;
 import static com.blogProject.constant.CommentConstants.COMMENT_CONTENT;
 import static com.blogProject.constant.CommentConstants.REPLY;
 import static com.blogProject.constant.CommentConstants.UPDATE_COMMENT_CONTENT;
+import static com.blogProject.constant.MemberConstants.ANOTHER_MEMBER;
 import static com.blogProject.constant.MemberConstants.EMAIL;
 import static com.blogProject.constant.MemberConstants.MEMBER_NAME;
 import static com.blogProject.constant.MemberConstants.PASSWORD;
@@ -75,11 +77,24 @@ public class CommentServiceTest {
   private Comment childComment;
   private WriteReply writeReply;
 
+  private Member another;
+
+
   @BeforeEach
   public void setUp() {
     writeReply = WriteReply.builder()
         .reply(REPLY)
         .build();
+
+    another = Member.builder()
+        .email(ANOTHER_MEMBER)
+        .name(MEMBER_NAME)
+        .password(PASSWORD)
+        .phoneNumber(PHONE_NUMBER)
+        .role(USER)
+        .isDeleted(false)
+        .build();
+
     member = Member.builder()
         .email(EMAIL)
         .name(MEMBER_NAME)
@@ -168,10 +183,10 @@ public class CommentServiceTest {
     public void getCommentsTest() {
       // given
       Page<Comment> page = new PageImpl<>(Collections.singletonList(comment));
-      when(commentRepository.findByPost(any(Post.class), any(Pageable.class))).thenReturn(page);
+      when(commentRepository.findByPostWithMemberAndPost(any(Post.class), any(Pageable.class))).thenReturn(page);
 
       // when
-      Page<CommentDto> result = commentService.getComments(1L, PageRequest.of(0, 10));
+      Page<ReplyDto> result = commentService.getComments(1L, PageRequest.of(0, 10));
 
       // then
       assertEquals(1, result.getContent().size());
@@ -198,7 +213,6 @@ public class CommentServiceTest {
 
   @Nested
   @DisplayName("댓글 Service Exception 테스트")
-  @WithMockUser(username = EMAIL, roles = "USER")
   class CommentExceptionTest {
 
     @Test
@@ -238,15 +252,15 @@ public class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 수정 살패 - 다른 회원의 댓글을 수정하려 할 때")
+    @DisplayName("댓글 수정 실패 - 다른 회원의 댓글을 수정하려 할 때")
     public void updateCommentTest_AccessDenied() {
-      // given
-      when(authentication.getName()).thenReturn("another@test.com");
+      // Given
+      when(authentication.getName()).thenReturn(ANOTHER_MEMBER);
+      when(memberRepository.findByEmail(ANOTHER_MEMBER)).thenReturn(Optional.of(another));
 
-      // when & then
-      assertThrows(GlobalException.class, () -> {
-        commentService.updateComment(1L, UPDATE_COMMENT_CONTENT, authentication);
-      });
+      // When & Then
+      assertThrows(GlobalException.class,
+          () -> commentService.updateComment(1L, UPDATE_COMMENT_CONTENT, authentication));
     }
 
     @Test
@@ -265,7 +279,8 @@ public class CommentServiceTest {
     @DisplayName("댓글 삭제 실패 - 다른 회원의 댓글을 삭제하려 할 때")
     public void deleteCommentTest_AccessDenied() {
       // given
-      when(authentication.getName()).thenReturn("another@test.com");
+      when(authentication.getName()).thenReturn(ANOTHER_MEMBER);
+      when(memberRepository.findByEmail(ANOTHER_MEMBER)).thenReturn(Optional.of(another));
 
       // when & then
       assertThrows(GlobalException.class, () -> {
