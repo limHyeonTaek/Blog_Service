@@ -66,7 +66,7 @@ public class CommentService {
   @Transactional
   public Page<ReplyDto> getComments(Long postId, Pageable pageable) {
     Post post = getPostById(postId);
-    Page<Comment> comments = commentRepository.findByPost(post, pageable);
+    Page<Comment> comments = commentRepository.findByPostWithMemberAndPost(post, pageable);
     return comments.map(ReplyDto::fromEntity);
   }
 
