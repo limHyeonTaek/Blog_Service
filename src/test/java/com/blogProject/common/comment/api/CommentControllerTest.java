@@ -7,7 +7,6 @@ import static com.blogProject.exception.ErrorCode.POST_NOT_FOUND;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -76,7 +75,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void writeCommentTest() throws Exception {
       // given
-      when(commentService.writeComment(anyLong(), anyString(), any())).thenReturn(commentDto);
+      when(commentService.writeComment(anyLong(), any(), any())).thenReturn(commentDto);
 
       // when & then
       mockMvc.perform(post("/api/comments/" + POST_ID)
@@ -91,7 +90,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void updateCommentTest() throws Exception {
       // given
-      when(commentService.updateComment(anyLong(), anyString(), any())).thenReturn(commentDto);
+      when(commentService.updateComment(anyLong(), any(), any())).thenReturn(commentDto);
 
       // when & then
       mockMvc.perform(put("/api/comments/" + COMMENT_ID)
@@ -145,7 +144,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void writeCommentMemberNotFoundTest() throws Exception {
       // given
-      when(commentService.writeComment(anyLong(), anyString(), any())).thenThrow(
+      when(commentService.writeComment(anyLong(), any(), any())).thenThrow(
           new MemberException(MEMBER_NOT_FOUND));
 
       // when & then
@@ -162,7 +161,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void updateCommentMemberNotFoundTest() throws Exception {
       // given
-      when(commentService.updateComment(anyLong(), anyString(), any())).thenThrow(
+      when(commentService.updateComment(anyLong(), any(), any())).thenThrow(
           new MemberException(MEMBER_NOT_FOUND));
 
       // when & then

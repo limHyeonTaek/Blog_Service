@@ -1,22 +1,31 @@
 ### create comment
-POST http://localhost:8080/api/comments/{{postId}}
+POST {{host}}/api/comments/{{postId}}
 Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 
 "comment"
 
-### update comment
-PUT http://localhost:8080/api/comments/{{commentId}}
+### update comment (대댓글 포함)
+PUT {{host}}/api/comments/{{commentId}}
 Content-Type: application/json
 Authorization: Bearer {{$auth.token()}}
 
 "update comment"
 
-### delete comment
-DELETE http://localhost:8080/api/comments/{{commentId}}
+### delete comment (대댓글 포함)
+DELETE {{host}}/api/comments/{{commentId}}
 Authorization: Bearer {{$auth.token()}}
 
 
 ### get comment(페이징 처리)
-GET http://localhost:8080/api/comments/{{postId}}?page=0&size=10
+GET {{host}}/api/comments/{{postId}}?page=0&size=10
 Authorization: Bearer {{$auth.token()}}
+
+###
+POST {{host}}/api/comments/{{commentId}}/reply
+Content-Type: application/json
+Authorization: Bearer {{$auth.token()}}
+
+{
+  "reply": "reply"
+}
