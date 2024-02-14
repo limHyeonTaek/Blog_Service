@@ -7,7 +7,6 @@ import static com.blogProject.exception.ErrorCode.POST_NOT_FOUND;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -20,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.blogProject.common.comment.dto.model.CommentDto;
+import com.blogProject.common.comment.dto.model.ReplyDto;
 import com.blogProject.common.comment.service.CommentService;
 import com.blogProject.common.member.exception.MemberException;
 import com.blogProject.common.post.exception.PostException;
@@ -53,12 +53,21 @@ public class CommentControllerTest {
   private CommentService commentService;
 
   private CommentDto commentDto;
+  private ReplyDto replyDto;
 
-  private static final Long COMMENT_ID = 1L;
+  private static final Long COMMENT_ID = 2L;
   private static final Long POST_ID = 1L;
 
   @BeforeEach
   void setUp() {
+    replyDto = ReplyDto.builder()
+        .commentId(COMMENT_ID)
+        .postId(POST_ID)
+        .member(EMAIL)
+        .comments(COMMENT_CONTENT)
+        .parentId(1L)
+        .build();
+
     commentDto = CommentDto.builder()
         .commentId(COMMENT_ID)
         .postId(POST_ID)
@@ -76,7 +85,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void writeCommentTest() throws Exception {
       // given
-      when(commentService.writeComment(anyLong(), anyString(), any())).thenReturn(commentDto);
+      when(commentService.writeComment(anyLong(), any(), any())).thenReturn(commentDto);
 
       // when & then
       mockMvc.perform(post("/api/comments/" + POST_ID)
@@ -91,7 +100,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void updateCommentTest() throws Exception {
       // given
-      when(commentService.updateComment(anyLong(), anyString(), any())).thenReturn(commentDto);
+      when(commentService.updateComment(anyLong(), any(), any())).thenReturn(commentDto);
 
       // when & then
       mockMvc.perform(put("/api/comments/" + COMMENT_ID)
@@ -124,7 +133,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void getCommentsTest() throws Exception {
       // given
-      Page<CommentDto> commentDtoPage = new PageImpl<>(List.of(commentDto));
+      Page<ReplyDto> commentDtoPage = new PageImpl<>(List.of(replyDto));
       when(commentService.getComments(anyLong(), any())).thenReturn(commentDtoPage);
 
       // when & then
@@ -145,7 +154,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void writeCommentMemberNotFoundTest() throws Exception {
       // given
-      when(commentService.writeComment(anyLong(), anyString(), any())).thenThrow(
+      when(commentService.writeComment(anyLong(), any(), any())).thenThrow(
           new MemberException(MEMBER_NOT_FOUND));
 
       // when & then
@@ -162,7 +171,7 @@ public class CommentControllerTest {
     @WithMockUser(username = EMAIL, roles = "USER")
     void updateCommentMemberNotFoundTest() throws Exception {
       // given
-      when(commentService.updateComment(anyLong(), anyString(), any())).thenThrow(
+      when(commentService.updateComment(anyLong(), any(), any())).thenThrow(
           new MemberException(MEMBER_NOT_FOUND));
 
       // when & then
